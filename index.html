@@ -46,7 +46,7 @@
 
                 // Send the data to Google Sheets via Apps Script endpoint
                 try {
-                    const response = await fetch('<YOUR_APPS_SCRIPT_WEB_APP_URL>', {
+                    const response = await fetch('https://script.google.com/macros/s/AKfycbxIBjwHVPOudpdYFxHjQfG3kGaV_tMvYwfsp1ACv9kWuwwfQBtVdTV1yxoMT_miW3OD/exec', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
