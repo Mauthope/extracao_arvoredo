@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Export Excel Data to Google Sheets</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://apis.google.com/js/api.js"></script>
     <style>
         table {
             border-collapse: collapse;
@@ -75,6 +76,26 @@
 
         let extractedData = [];
 
+        // Initialize the Google API client
+        function initGoogleAPI() {
+            gapi.client.init({
+                apiKey: 'YOUR_API_KEY',
+                clientId: 'YOUR_CLIENT_ID',
+                scope: 'https://www.googleapis.com/auth/spreadsheets',
+                discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
+            }).then(() => {
+                console.log('Google API initialized.');
+            }).catch(error => {
+                console.error('Error initializing Google API:', error);
+            });
+        }
+
+        // Function to load Google API client
+        function loadGoogleAPI() {
+            gapi.load('client:auth2', initGoogleAPI);
+        }
+
+        // Function to process the Excel file
         document.getElementById('processButton').addEventListener('click', () => {
             const fileInput = document.getElementById('excelFile');
             if (!fileInput.files.length) {
@@ -111,6 +132,7 @@
             reader.readAsArrayBuffer(file);
         });
 
+        // Function to upload data to Google Sheets
         document.getElementById('uploadButton').addEventListener('click', async () => {
             if (!extractedData.length) {
                 alert('No data to upload. Please process the file first.');
@@ -119,16 +141,19 @@
 
             const singleRowData = extractedData;
 
-            try {
-                const response = await fetch('https://script.google.com/macros/s/AKfycbxIBjwHVPOudpdYFxHjQfG3kGaV_tMvYwfsp1ACv9kWuwwfQBtVdTV1yxoMT_miW3OD/exec', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ data: singleRowData }),
-                });
+            const params = {
+                spreadsheetId: '1e1T4lL2mjq9unFYktzHmwpQx34e3aYDKsUhLrtlMC20',
+                range: 'Sheet1!A1', // Update the range as needed
+                valueInputOption: 'RAW',
+                resource: {
+                    values: [singleRowData]
+                }
+            };
 
-                if (response.ok) {
+            try {
+                const request = gapi.client.sheets.spreadsheets.values.append(params);
+                const response = await request;
+                if (response.status === 200) {
                     alert('Data successfully uploaded to Google Sheets!');
                 } else {
                     alert('Failed to upload data.');
@@ -138,6 +163,9 @@
                 alert('Error uploading data. Check console for details.');
             }
         });
+
+        // Load Google API client on page load
+        window.onload = loadGoogleAPI;
     </script>
 </body>
 </html>
