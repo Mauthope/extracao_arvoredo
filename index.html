@@ -7,6 +7,16 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://apis.google.com/js/api.js"></script>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        button {
+            margin: 10px 5px;
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+        }
         table {
             border-collapse: collapse;
             width: 100%;
@@ -18,6 +28,16 @@
         th, td {
             padding: 8px;
             text-align: left;
+        }
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: green;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
         }
     </style>
 </head>
@@ -63,10 +83,9 @@
         <tbody></tbody>
     </table>
 
+    <div id="notification" class="notification"></div>
+
     <script>
-        const sheetID = '1e1T4lL2mjq9unFYktzHmwpQx34e3aYDKsUhLrtlMC20'; // Replace with your Google Sheet ID
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbxIBjwHVPOudpdYFxHjQfG3kGaV_tMvYwfsp1ACv9kWuwwfQBtVdTV1yxoMT_miW3OD/exec'; // Replace with your Script URL
-        
         const targetCells = [
             { col: 1, row: 6 }, { col: 6, row: 6 }, { col: 8, row: 6 }, { col: 9, row: 6 },
             { col: 92, row: 6 }, { col: 93, row: 6 }, { col: 94, row: 6 }, { col: 96, row: 6 },
@@ -79,17 +98,27 @@
 
         let extractedData = [];
 
-        // Initialize the Google API client
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            notification.innerText = message;
+            notification.style.backgroundColor = type === 'success' ? 'green' : 'red';
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
         function initGoogleAPI() {
             gapi.client.init({
                 apiKey: 'YOUR_API_KEY',
                 clientId: 'YOUR_CLIENT_ID',
                 scope: 'https://www.googleapis.com/auth/spreadsheets',
-                discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
+                discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4']
             }).then(() => {
                 console.log('Google API initialized.');
             }).catch(error => {
                 console.error('Error initializing Google API:', error);
+                showNotification('Error initializing Google API.', 'error');
             });
         }
 
@@ -100,7 +129,7 @@
         document.getElementById('processButton').addEventListener('click', () => {
             const fileInput = document.getElementById('excelFile');
             if (!fileInput.files.length) {
-                alert('Please select an Excel file first.');
+                showNotification('Please select an Excel file first.', 'error');
                 return;
             }
 
@@ -128,6 +157,7 @@
                     rowElement.appendChild(cellElement);
                 });
                 tableBody.appendChild(rowElement);
+                showNotification('File processed successfully!', 'success');
             };
 
             reader.readAsArrayBuffer(file);
@@ -135,20 +165,32 @@
 
         document.getElementById('uploadButton').addEventListener('click', async () => {
             if (!extractedData.length) {
-                alert('No data to upload. Please process the file first.');
+                showNotification('No data to upload. Please process the file first.', 'error');
                 return;
             }
 
-            const response = await fetch(scriptURL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ data: extractedData, sheetID })
-            });
+            const singleRowData = extractedData;
 
-            if (response.ok) {
-                alert('Data successfully uploaded to Google Sheets!');
-            } else {
-                alert('Failed to upload data.');
+            const params = {
+                spreadsheetId: 'YOUR_SPREADSHEET_ID',
+                range: 'Sheet1',
+                valueInputOption: 'RAW',
+                resource: {
+                    values: [singleRowData]
+                }
+            };
+
+            try {
+                const request = gapi.client.sheets.spreadsheets.values.append(params);
+                const response = await request;
+                if (response.status === 200) {
+                    showNotification('Data successfully uploaded to Google Sheets!', 'success');
+                } else {
+                    showNotification('Failed to upload data.', 'error');
+                }
+            } catch (error) {
+                console.error('Error uploading data:', error);
+                showNotification('Error uploading data. Check console for details.', 'error');
             }
         });
 
