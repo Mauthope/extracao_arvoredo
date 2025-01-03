@@ -1,200 +1,174 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Export Excel Data to Google Sheets</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://apis.google.com/js/api.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        button {
-            margin: 10px 5px;
-            padding: 10px 15px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            margin-top: 20px;
-        }
-        table, th, td {
-            border: 1px solid black;
-        }
-        th, td {
-            padding: 8px;
-            text-align: left;
-        }
-        .notification {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background-color: green;
-            color: white;
-            padding: 10px;
-            border-radius: 5px;
-            display: none;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Importar Dados para Google Sheets</title>
 </head>
 <body>
-    <h1>Export Excel Data to Google Sheets</h1>
-    <input type="file" id="excelFile" accept=".xlsx" />
-    <button id="processButton">Process File</button>
-    <button id="uploadButton">Upload to Google Sheets</button>
+  <h1>Importar Dados para Google Sheets</h1>
+  
+  <!-- Formulário para upload do arquivo XLSX -->
+  <input type="file" id="xlsx-file" accept=".xlsx">
+  <button onclick="uploadData()">Enviar Dados</button>
 
-    <h2>Extracted Data</h2>
-    <table id="dataTable">
-        <thead>
-            <tr>
-                <th>Cliente</th>
-                <th>Entrada</th>
-                <th>Código de Barras</th>
-                <th>Descrição</th>
-                <th>M.S</th>
-                <th>Umidade</th>
-                <th>FDA</th>
-                <th>FDNmo</th>
-                <th>Lignina</th>
-                <th>Amido</th>
-                <th>P. Bruta</th>
-                <th>PIDA</th>
-                <th>PIDN</th>
-                <th>P. Soluvel</th>
-                <th>E.E</th>
-                <th>Cinzas</th>
-                <th>pH</th>
-                <th>A. Lático</th>
-                <th>A. Acético</th>
-                <th>A. Butírico</th>
-                <th>dFDNp 48h</th>
-                <th>uFDN 240h</th>
-                <th>Dig. In situ do Amido 7h</th>
-                <th>Kd do FDN</th>
-                <th>Kd do Amido</th>
-                <th>NDT</th>
-                <th>Milk/Ton</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+  <!-- Tabela para visualizar os dados antes do envio -->
+  <h3>Visualização dos Dados:</h3>
+  <table id="data-table" border="1" style="width: 100%; margin-bottom: 20px; display: none;">
+    <thead>
+      <tr>
+        <th>Cliente</th>
+        <th>Entrada</th>
+        <th>Código de Barras</th>
+        <th>Descrição</th>
+        <th>MS</th>
+        <th>Umidade</th>
+        <th>FDA</th>
+        <th>FDNMO</th>
+        <th>Lignina</th>
+        <th>Amido</th>
+        <th>P Bruta</th>
+        <th>PIDA</th>
+        <th>PIDN</th>
+        <th>P Solúvel</th>
+        <th>EE</th>
+        <th>Cinzas</th>
+        <th>pH</th>
+        <th>A Lático</th>
+        <th>A Acético</th>
+        <th>A Butírico</th>
+        <th>dFDN p/ 48h</th>
+        <th>uFDN p/ 240h</th>
+        <th>Dig. In Situ Amido 7h</th>
+        <th>Kd FDN</th>
+        <th>Kd Amido</th>
+        <th>NDT</th>
+        <th>Milk Ton</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Os dados serão inseridos aqui dinamicamente -->
+    </tbody>
+  </table>
 
-    <div id="notification" class="notification"></div>
+  <!-- Exibição de status -->
+  <div id="status"></div>
 
-    <script>
-        const targetCells = [
-            { col: 1, row: 6 }, { col: 6, row: 6 }, { col: 8, row: 6 }, { col: 9, row: 6 },
-            { col: 92, row: 6 }, { col: 93, row: 6 }, { col: 94, row: 6 }, { col: 96, row: 6 },
-            { col: 97, row: 6 }, { col: 98, row: 6 }, { col: 105, row: 6 }, { col: 108, row: 6 },
-            { col: 109, row: 6 }, { col: 113, row: 6 }, { col: 121, row: 6 }, { col: 137, row: 6 },
-            { col: 143, row: 6 }, { col: 144, row: 6 }, { col: 145, row: 6 }, { col: 146, row: 6 },
-            { col: 158, row: 6 }, { col: 168, row: 6 }, { col: 178, row: 6 }, { col: 181, row: 6 },
-            { col: 182, row: 6 }, { col: 187, row: 6 }, { col: 188, row: 6 }
+  <!-- Script do frontend -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+  <script>
+    async function uploadData() {
+      const fileInput = document.getElementById('xlsx-file');
+      const file = fileInput.files[0];
+      if (!file) {
+        alert('Por favor, selecione um arquivo XLSX.');
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        const data = event.target.result;
+        const workbook = XLSX.read(data, { type: 'binary' });
+
+        // Supondo que os dados estejam na primeira planilha
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+
+        // Células que devemos extrair (com base nas coordenadas fornecidas)
+        const cellReferences = [
+          "A6", "F6", "H6", "I6", "AF6", "AG6", "AH6", "AJ6", "AK6", "AL6", 
+          "AO6", "AR6", "AS6", "AW6", "BC6", "BQ6", "BU6", "BV6", "BW6", 
+          "BX6", "BZ6", "BH6", "BI6", "BJ6", "BM6", "BN6", "BO6"
         ];
 
-        let extractedData = [];
-
-        function showNotification(message, type = 'info') {
-            const notification = document.getElementById('notification');
-            notification.innerText = message;
-            notification.style.backgroundColor = type === 'success' ? 'green' : 'red';
-            notification.style.display = 'block';
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 3000);
-        }
-
-        function initGoogleAPI() {
-            gapi.client.init({
-                apiKey: 'YOUR_API_KEY',
-                clientId: 'YOUR_CLIENT_ID',
-                scope: 'https://www.googleapis.com/auth/spreadsheets',
-                discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4']
-            }).then(() => {
-                console.log('Google API initialized.');
-            }).catch(error => {
-                console.error('Error initializing Google API:', error);
-                showNotification('Error initializing Google API.', 'error');
-            });
-        }
-
-        function loadGoogleAPI() {
-            gapi.load('client:auth2', initGoogleAPI);
-        }
-
-        document.getElementById('processButton').addEventListener('click', () => {
-            const fileInput = document.getElementById('excelFile');
-            if (!fileInput.files.length) {
-                showNotification('Please select an Excel file first.', 'error');
-                return;
-            }
-
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-
-            reader.onload = function (e) {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const sheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[sheetName];
-
-                extractedData = targetCells.map(cell => {
-                    const cellAddress = XLSX.utils.encode_cell({ c: cell.col - 1, r: cell.row - 1 });
-                    const value = worksheet[cellAddress] ? worksheet[cellAddress].v : null;
-                    return value;
-                });
-
-                const tableBody = document.querySelector('#dataTable tbody');
-                tableBody.innerHTML = '';
-                const rowElement = document.createElement('tr');
-                extractedData.forEach(value => {
-                    const cellElement = document.createElement('td');
-                    cellElement.innerText = value !== null ? value : '';
-                    rowElement.appendChild(cellElement);
-                });
-                tableBody.appendChild(rowElement);
-                showNotification('File processed successfully!', 'success');
-            };
-
-            reader.readAsArrayBuffer(file);
+        // Extrair os dados das células
+        const extractedData = cellReferences.map(ref => {
+          const cell = sheet[ref];
+          return cell ? cell.v : ""; // Retorna o valor da célula ou uma string vazia caso não haja valor
         });
 
-        document.getElementById('uploadButton').addEventListener('click', async () => {
-            if (!extractedData.length) {
-                showNotification('No data to upload. Please process the file first.', 'error');
-                return;
-            }
+        // Exibir os dados na tabela para visualização
+        displayDataInTable(extractedData);
 
-            const singleRowData = extractedData;
+        // Quando o usuário clicar em "Enviar Dados", enviaremos os dados para o Google Sheets
+        document.querySelector('button').addEventListener('click', function() {
+          sendToGoogleSheets(extractedData);
+        });
+      };
 
-            const params = {
-                spreadsheetId: 'YOUR_SPREADSHEET_ID',
-                range: 'Sheet1',
-                valueInputOption: 'RAW',
-                resource: {
-                    values: [singleRowData]
-                }
-            };
+      reader.readAsBinaryString(file);
+    }
 
-            try {
-                const request = gapi.client.sheets.spreadsheets.values.append(params);
-                const response = await request;
-                if (response.status === 200) {
-                    showNotification('Data successfully uploaded to Google Sheets!', 'success');
-                } else {
-                    showNotification('Failed to upload data.', 'error');
-                }
-            } catch (error) {
-                console.error('Error uploading data:', error);
-                showNotification('Error uploading data. Check console for details.', 'error');
-            }
+    function displayDataInTable(data) {
+      const tableBody = document.querySelector('#data-table tbody');
+      tableBody.innerHTML = '';  // Limpa a tabela antes de adicionar novas linhas
+
+      // Adiciona uma linha para os dados extraídos
+      const row = document.createElement('tr');
+      data.forEach(item => {
+        const cell = document.createElement('td');
+        cell.textContent = item;
+        row.appendChild(cell);
+      });
+      
+      tableBody.appendChild(row);
+      
+      // Exibe a tabela
+      document.getElementById('data-table').style.display = 'table';
+    }
+
+    async function sendToGoogleSheets(data) {
+      const url = 'https://script.google.com/macros/s/AKfycbxIBjwHVPOudpdYFxHjQfG3kGaV_tMvYwfsp1ACv9kWuwwfQBtVdTV1yxoMT_miW3OD/exec'; // Substitua pelo ID do seu script
+      const formData = new FormData();
+
+      // Enviar os dados para a planilha do Google Sheets
+      const requestData = {
+        cliente: data[0] || "",
+        entrada: data[1] || "",
+        codigoBarras: data[2] || "",
+        descricao: data[3] || "",
+        ms: data[4] || "",
+        umidade: data[5] || "",
+        fda: data[6] || "",
+        fdnmo: data[7] || "",
+        lignina: data[8] || "",
+        amido: data[9] || "",
+        pBruta: data[10] || "",
+        pida: data[11] || "",
+        pidn: data[12] || "",
+        pSoluvel: data[13] || "",
+        ee: data[14] || "",
+        cinzas: data[15] || "",
+        ph: data[16] || "",
+        aLatico: data[17] || "",
+        aAcetico: data[18] || "",
+        aButirico: data[19] || "",
+        dFDNp48h: data[20] || "",
+        uFDN240h: data[21] || "",
+        digInSituAmido7h: data[22] || "",
+        kdFDN: data[23] || "",
+        kdAmido: data[24] || "",
+        ndt: data[25] || "",
+        milkTon: data[26] || "",
+      };
+
+      // Enviar os dados via POST
+      for (const key in requestData) {
+        formData.append(key, requestData[key]);
+      }
+
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          body: formData,
         });
 
-        window.onload = loadGoogleAPI;
-    </script>
+        const result = await response.json();
+        document.getElementById('status').innerText = result.message;
+      } catch (error) {
+        console.error('Erro ao enviar os dados:', error);
+        document.getElementById('status').innerText = 'Erro ao enviar os dados.';
+      }
+    }
+  </script>
 </body>
 </html>
