@@ -5,27 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Export Excel to Google Sheets</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+    </style>
 </head>
 <body>
     <h1>Export Excel Data to Google Sheets</h1>
     <input type="file" id="excelFile" accept=".xlsx" />
+    <button id="processButton">Process File</button>
     <button id="uploadButton">Upload to Google Sheets</button>
-    <div id="dataPreview">
-        <h2>Data Preview</h2>
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>Row</th>
-                    <th>Column</th>
-                    <th>Value</th>
-                </tr>
-            </thead>
-            <tbody id="dataBody"></tbody>
-        </table>
-    </div>
+
+    <h2>Extracted Data</h2>
+    <table id="dataTable">
+        <thead>
+            <tr>
+                <th>Column</th>
+                <th>Row</th>
+                <th>Value</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
 
     <script>
-        document.getElementById('uploadButton').addEventListener('click', async () => {
+        const targetCells = [
+            { col: 1, row: 6 }, { col: 6, row: 6 }, { col: 8, row: 6 }, { col: 9, row: 6 },
+            { col: 92, row: 6 }, { col: 93, row: 6 }, { col: 94, row: 6 }, { col: 96, row: 6 },
+            { col: 97, row: 6 }, { col: 98, row: 6 }, { col: 105, row: 6 }, { col: 108, row: 6 },
+            { col: 109, row: 6 }, { col: 113, row: 6 }, { col: 121, row: 6 }, { col: 137, row: 6 },
+            { col: 143, row: 6 }, { col: 144, row: 6 }, { col: 145, row: 6 }, { col: 146, row: 6 },
+            { col: 158, row: 6 }, { col: 168, row: 6 }, { col: 178, row: 6 }, { col: 181, row: 6 },
+            { col: 182, row: 6 }, { col: 187, row: 6 }, { col: 188, row: 6 }
+        ];
+
+        let extractedData = [];
+
+        document.getElementById('processButton').addEventListener('click', () => {
             const fileInput = document.getElementById('excelFile');
             if (!fileInput.files.length) {
                 alert('Please select an Excel file first.');
@@ -35,65 +61,54 @@
             const file = fileInput.files[0];
             const reader = new FileReader();
 
-            reader.onload = async function (e) {
+            reader.onload = function (e) {
                 const data = new Uint8Array(e.target.result);
                 const workbook = XLSX.read(data, { type: 'array' });
                 const sheetName = workbook.SheetNames[0];
                 const worksheet = workbook.Sheets[sheetName];
 
-                // Define the specific cells to extract
-                const cellPositions = [
-                    [1, 6], [6, 6], [8, 6], [9, 6], [92, 6], [93, 6], [94, 6],
-                    [96, 6], [97, 6], [98, 6], [105, 6], [108, 6], [109, 6],
-                    [113, 6], [121, 6], [137, 6], [143, 6], [144, 6], [145, 6],
-                    [146, 6], [158, 6], [168, 6], [178, 6], [181, 6], [182, 6],
-                    [187, 6], [188, 6]
-                ];
-
-                // Extract data from the specified cells
-                const extractedData = cellPositions.map(([row, col]) => {
-                    const cellAddress = XLSX.utils.encode_cell({ r: row - 1, c: col - 1 });
-                    const cellValue = worksheet[cellAddress]?.v || null;
-                    return { row, col, value: cellValue };
+                extractedData = targetCells.map(cell => {
+                    const cellAddress = XLSX.utils.encode_cell({ c: cell.col - 1, r: cell.row - 1 });
+                    const value = worksheet[cellAddress] ? worksheet[cellAddress].v : null;
+                    return { col: cell.col, row: cell.row, value };
                 });
 
-                // Populate the data preview table
-                const dataBody = document.getElementById('dataBody');
-                dataBody.innerHTML = '';
-                extractedData.forEach(item => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${item.row}</td>
-                        <td>${item.col}</td>
-                        <td>${item.value}</td>
-                    `;
-                    dataBody.appendChild(row);
+                const tableBody = document.querySelector('#dataTable tbody');
+                tableBody.innerHTML = '';
+                extractedData.forEach(({ col, row, value }) => {
+                    const rowElement = document.createElement('tr');
+                    rowElement.innerHTML = `<td>${col}</td><td>${row}</td><td>${value}</td>`;
+                    tableBody.appendChild(rowElement);
                 });
-
-                // Confirm upload to Google Sheets
-                if (confirm('Do you want to upload this data to Google Sheets?')) {
-                    try {
-                        const response = await fetch('<YOUR_APPS_SCRIPT_WEB_APP_URL>', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify(extractedData),
-                        });
-
-                        if (response.ok) {
-                            alert('Data successfully uploaded to Google Sheets!');
-                        } else {
-                            alert('Failed to upload data.');
-                        }
-                    } catch (error) {
-                        console.error('Error uploading data:', error);
-                        alert('Error uploading data. Check console for details.');
-                    }
-                }
             };
 
             reader.readAsArrayBuffer(file);
+        });
+
+        document.getElementById('uploadButton').addEventListener('click', async () => {
+            if (!extractedData.length) {
+                alert('No data to upload. Please process the file first.');
+                return;
+            }
+
+            try {
+                const response = await fetch('<YOUR_APPS_SCRIPT_WEB_APP_URL>', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(extractedData),
+                });
+
+                if (response.ok) {
+                    alert('Data successfully uploaded to Google Sheets!');
+                } else {
+                    alert('Failed to upload data.');
+                }
+            } catch (error) {
+                console.error('Error uploading data:', error);
+                alert('Error uploading data. Check console for details.');
+            }
         });
     </script>
 </body>
