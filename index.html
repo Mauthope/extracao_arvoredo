@@ -91,13 +91,15 @@
                 return;
             }
 
+            const singleRowData = extractedData.map(item => item.value);
+
             try {
                 const response = await fetch('<YOUR_APPS_SCRIPT_WEB_APP_URL>', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(extractedData),
+                    body: JSON.stringify({ data: singleRowData }),
                 });
 
                 if (response.ok) {
