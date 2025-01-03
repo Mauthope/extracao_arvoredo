@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Export Excel to Google Sheets</title>
+    <title>Export Excel Data to Google Sheets</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         table {
@@ -63,15 +63,14 @@
     </table>
 
     <script>
-        // A lista de células que contém os dados a serem extraídos
         const targetCells = [
-            { col: 1, row: 2 }, { col: 2, row: 2 }, { col: 3, row: 2 }, { col: 4, row: 2 },
-            { col: 5, row: 2 }, { col: 6, row: 2 }, { col: 7, row: 2 }, { col: 8, row: 2 },
-            { col: 9, row: 2 }, { col: 10, row: 2 }, { col: 11, row: 2 }, { col: 12, row: 2 },
-            { col: 13, row: 2 }, { col: 14, row: 2 }, { col: 15, row: 2 }, { col: 16, row: 2 },
-            { col: 17, row: 2 }, { col: 18, row: 2 }, { col: 19, row: 2 }, { col: 20, row: 2 },
-            { col: 21, row: 2 }, { col: 22, row: 2 }, { col: 23, row: 2 }, { col: 24, row: 2 },
-            { col: 25, row: 2 }, { col: 26, row: 2 }
+            { col: 1, row: 6 }, { col: 6, row: 6 }, { col: 8, row: 6 }, { col: 9, row: 6 },
+            { col: 92, row: 6 }, { col: 93, row: 6 }, { col: 94, row: 6 }, { col: 96, row: 6 },
+            { col: 97, row: 6 }, { col: 98, row: 6 }, { col: 105, row: 6 }, { col: 108, row: 6 },
+            { col: 109, row: 6 }, { col: 113, row: 6 }, { col: 121, row: 6 }, { col: 137, row: 6 },
+            { col: 143, row: 6 }, { col: 144, row: 6 }, { col: 145, row: 6 }, { col: 146, row: 6 },
+            { col: 158, row: 6 }, { col: 168, row: 6 }, { col: 178, row: 6 }, { col: 181, row: 6 },
+            { col: 182, row: 6 }, { col: 187, row: 6 }, { col: 188, row: 6 }
         ];
 
         let extractedData = [];
@@ -99,14 +98,14 @@
                 });
 
                 const tableBody = document.querySelector('#dataTable tbody');
-                tableBody.innerHTML = '';  // Clear previous rows
+                tableBody.innerHTML = '';
                 const rowElement = document.createElement('tr');
                 extractedData.forEach(value => {
-                    const tdElement = document.createElement('td');
-                    tdElement.textContent = value || '';  // Use an empty string if no data
-                    rowElement.appendChild(tdElement);
+                    const cellElement = document.createElement('td');
+                    cellElement.innerText = value !== null ? value : '';
+                    rowElement.appendChild(cellElement);
                 });
-                tableBody.appendChild(rowElement);  // Add a new row with extracted data
+                tableBody.appendChild(rowElement);
             };
 
             reader.readAsArrayBuffer(file);
