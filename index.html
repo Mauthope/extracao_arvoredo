@@ -10,6 +10,19 @@
     <h1>Export Excel Data to Google Sheets</h1>
     <input type="file" id="excelFile" accept=".xlsx" />
     <button id="uploadButton">Upload to Google Sheets</button>
+    <div id="dataPreview">
+        <h2>Data Preview</h2>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Row</th>
+                    <th>Column</th>
+                    <th>Value</th>
+                </tr>
+            </thead>
+            <tbody id="dataBody"></tbody>
+        </table>
+    </div>
 
     <script>
         document.getElementById('uploadButton').addEventListener('click', async () => {
@@ -44,24 +57,39 @@
                     return { row, col, value: cellValue };
                 });
 
-                // Send the data to Google Sheets via Apps Script endpoint
-                try {
-                    const response = await fetch('https://script.google.com/macros/s/AKfycbxIBjwHVPOudpdYFxHjQfG3kGaV_tMvYwfsp1ACv9kWuwwfQBtVdTV1yxoMT_miW3OD/exec', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(extractedData),
-                    });
+                // Populate the data preview table
+                const dataBody = document.getElementById('dataBody');
+                dataBody.innerHTML = '';
+                extractedData.forEach(item => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${item.row}</td>
+                        <td>${item.col}</td>
+                        <td>${item.value}</td>
+                    `;
+                    dataBody.appendChild(row);
+                });
 
-                    if (response.ok) {
-                        alert('Data successfully uploaded to Google Sheets!');
-                    } else {
-                        alert('Failed to upload data.');
+                // Confirm upload to Google Sheets
+                if (confirm('Do you want to upload this data to Google Sheets?')) {
+                    try {
+                        const response = await fetch('<YOUR_APPS_SCRIPT_WEB_APP_URL>', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify(extractedData),
+                        });
+
+                        if (response.ok) {
+                            alert('Data successfully uploaded to Google Sheets!');
+                        } else {
+                            alert('Failed to upload data.');
+                        }
+                    } catch (error) {
+                        console.error('Error uploading data:', error);
+                        alert('Error uploading data. Check console for details.');
                     }
-                } catch (error) {
-                    console.error('Error uploading data:', error);
-                    alert('Error uploading data. Check console for details.');
                 }
             };
 
