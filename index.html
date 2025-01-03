@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Export Excel to Google Sheets</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+    <h1>Export Excel Data to Google Sheets</h1>
+    <input type="file" id="excelFile" accept=".xlsx" />
+    <button id="uploadButton">Upload to Google Sheets</button>
+
+    <script>
+        document.getElementById('uploadButton').addEventListener('click', async () => {
+            const fileInput = document.getElementById('excelFile');
+            if (!fileInput.files.length) {
+                alert('Please select an Excel file first.');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = async function (e) {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+
+                // Define the specific cells to extract
+                const cellPositions = [
+                    [1, 6], [6, 6], [8, 6], [9, 6], [92, 6], [93, 6], [94, 6],
+                    [96, 6], [97, 6], [98, 6], [105, 6], [108, 6], [109, 6],
+                    [113, 6], [121, 6], [137, 6], [143, 6], [144, 6], [145, 6],
+                    [146, 6], [158, 6], [168, 6], [178, 6], [181, 6], [182, 6],
+                    [187, 6], [188, 6]
+                ];
+
+                // Extract data from the specified cells
+                const extractedData = cellPositions.map(([row, col]) => {
+                    const cellAddress = XLSX.utils.encode_cell({ r: row - 1, c: col - 1 });
+                    const cellValue = worksheet[cellAddress]?.v || null;
+                    return { row, col, value: cellValue };
+                });
+
+                // Send the data to Google Sheets via Apps Script endpoint
+                try {
+                    const response = await fetch('<YOUR_APPS_SCRIPT_WEB_APP_URL>', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(extractedData),
+                    });
+
+                    if (response.ok) {
+                        alert('Data successfully uploaded to Google Sheets!');
+                    } else {
+                        alert('Failed to upload data.');
+                    }
+                } catch (error) {
+                    console.error('Error uploading data:', error);
+                    alert('Error uploading data. Check console for details.');
+                }
+            };
+
+            reader.readAsArrayBuffer(file);
+        });
+    </script>
+</body>
+</html>
