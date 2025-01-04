@@ -121,15 +121,9 @@
       }
 
       const url = 'https://script.google.com/macros/s/AKfycbxIBjwHVPOudpdYFxHjQfG3kGaV_tMvYwfsp1ACv9kWuwwfQBtVdTV1yxoMT_miW3OD/exec'; // Substitua pelo ID do seu script
-      const table = document.getElementById('data-table');
-      const rows = table.querySelectorAll('tbody tr');
 
-      const dataToSend = [];
-      rows.forEach(row => {
-        const cells = row.querySelectorAll('td');
-        const rowData = Array.from(cells).map(cell => cell.textContent);
-        dataToSend.push(rowData);
-      });
+      // Envia apenas os dados extraídos (sem o cabeçalho)
+      const dataToSend = [extractedData];
 
       try {
         const response = await fetch(url, {
