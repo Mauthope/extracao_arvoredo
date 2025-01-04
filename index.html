@@ -81,66 +81,78 @@
     </tbody>
   </table>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
   <script>
     let sheetData = [];
 
     document.getElementById('file-input').addEventListener('change', (e) => {
       let file = e.target.files[0];
-      let reader = new FileReader();
-
-      reader.onload = function(event) {
-        let data = new Uint8Array(event.target.result);
-        let workbook = XLSX.read(data, { type: 'array' });
+      if (file) {
+        let reader = new FileReader();
         
-        // Assumindo que os dados estão na primeira planilha
-        let worksheet = workbook.Sheets[workbook.SheetNames[0]];
-        let jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+        reader.onload = function(event) {
+          let data = new Uint8Array(event.target.result);
+          let workbook = XLSX.read(data, { type: 'array' });
+          
+          // Assumindo que os dados estão na primeira planilha
+          let worksheet = workbook.Sheets[workbook.SheetNames[0]];
+          let jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-        // Coletando dados das células específicas (de A6 até GF6)
-        sheetData = [];
-        for (let i = 5; i < jsonData.length; i++) {
-          let row = jsonData[i];
-          sheetData.push({
-            Cliente: row[0],
-            Entrada: row[5],
-            CodigoDeBarras: row[7],
-            Descricao: row[8],
-            MS: row[93],
-            Umidade: row[94],
-            FDA: row[95],
-            FDNmo: row[96],
-            Lignina: row[97],
-            Amido: row[98],
-            PBruta: row[99],
-            PIDA: row[100],
-            PIDN: row[101],
-            PSoluvel: row[102],
-            EE: row[104],
-            Cinzas: row[105],
-            pH: row[106],
-            ALactico: row[107],
-            AAcetico: row[108],
-            AButirico: row[109],
-            dFDNp48h: row[110],
-            uFDN240h: row[111],
-            DigInSituAmido7h: row[112],
-            KdFDN: row[113],
-            KdAmido: row[114],
-            NDT: row[115],
-            MilkTon: row[116]
-          });
-        }
+          // Log para verificar os dados extraídos
+          console.log('Dados extraídos:', jsonData);
+          
+          // Coletando dados das células específicas
+          sheetData = [];
+          for (let i = 5; i < jsonData.length; i++) {
+            let row = jsonData[i];
+            sheetData.push({
+              Cliente: row[0],
+              Entrada: row[5],
+              CodigoDeBarras: row[7],
+              Descricao: row[8],
+              MS: row[93],
+              Umidade: row[94],
+              FDA: row[95],
+              FDNmo: row[96],
+              Lignina: row[97],
+              Amido: row[98],
+              PBruta: row[99],
+              PIDA: row[100],
+              PIDN: row[101],
+              PSoluvel: row[102],
+              EE: row[104],
+              Cinzas: row[105],
+              pH: row[106],
+              ALactico: row[107],
+              AAcetico: row[108],
+              AButirico: row[109],
+              dFDNp48h: row[110],
+              uFDN240h: row[111],
+              DigInSituAmido7h: row[112],
+              KdFDN: row[113],
+              KdAmido: row[114],
+              NDT: row[115],
+              MilkTon: row[116]
+            });
+          }
 
-        // Exibindo os dados na tabela
-        displayTable(sheetData);
-      };
+          // Exibindo os dados na tabela
+          displayTable(sheetData);
+        };
 
-      reader.readAsArrayBuffer(file);
+        reader.readAsArrayBuffer(file);
+      }
     });
 
     function displayTable(data) {
       const tbody = document.getElementById('data-table').getElementsByTagName('tbody')[0];
       tbody.innerHTML = ""; // Limpar a tabela antes de exibir os dados
+
+      // Verifica se há dados para exibir
+      if (data.length === 0) {
+        alert("Nenhum dado encontrado no arquivo.");
+        return;
+      }
 
       data.forEach((rowData) => {
         let row = document.createElement('tr');
@@ -154,6 +166,11 @@
     }
 
     function submitData() {
+      if (sheetData.length === 0) {
+        alert("Nenhum dado para enviar.");
+        return;
+      }
+
       // Enviar os dados para o Google Sheets usando o App Script
       const url = 'https://script.google.com/macros/s/SEU_SCRIPT_URL/exec'; // Substitua pelo seu App Script URL
       fetch(url, {
