@@ -166,27 +166,32 @@
     }
 
     function submitData() {
-      if (sheetData.length === 0) {
-        alert("Nenhum dado para enviar.");
-        return;
-      }
+  if (sheetData.length === 0) {
+    alert("Nenhum dado para enviar.");
+    return;
+  }
 
-      // Enviar os dados para o Google Sheets usando o App Script
-      const url = 'https://script.google.com/macros/s/AKfycbwAmrqJJ2Br3IKzr0OMsaqxbUeqbhWu6KliO71wXQ-MU_cwL8JM1L1k9o4u46Ucvz-O/exec'; // Substitua pelo seu App Script URL
-      fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(sheetData)
-      })
-      .then(response => response.json())
-      .then(data => alert('Dados enviados com sucesso!'))
-      .catch(error => {
-        console.error('Erro ao enviar os dados:', error);
-        alert('Ocorreu um erro ao enviar os dados.');
-      });
-    }
+  const url = 'https://script.google.com/macros/s/AKfycbwAmrqJJ2Br3IKzr0OMsaqxbUeqbhWu6KliO71wXQ-MU_cwL8JM1L1k9o4u46Ucvz-O/exec'; // Substitua pela sua URL
+  fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(sheetData),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.result === 'success') {
+        alert(data.message);
+      } else {
+        alert('Erro: ' + data.message);
+      }
+    })
+    .catch((error) => {
+      console.error('Erro ao enviar os dados:', error);
+      alert('Ocorreu um erro ao enviar os dados.');
+    });
+}
   </script>
 
 </body>
