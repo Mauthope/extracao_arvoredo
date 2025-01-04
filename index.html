@@ -120,28 +120,19 @@
         return;
       }
 
-      // Verificar se os dados estão formatados corretamente (dado mínimo)
-      if (extractedData.some(item => item === "")) {
-        alert('Erro: Os dados carregados estão incompletos. Verifique o arquivo XLSX.');
-        return;
-      }
+      const url = 'https://script.google.com/macros/s/AKfycbxIBjwHVPOudpdYFxHjQfG3kGaV_tMvYwfsp1ACv9kWuwwfQBtVdTV1yxoMT_miW3OD/exec'; // Substitua pela URL do seu script
 
-      const url = 'https://script.google.com/macros/s/AKfycbxIBjwHVPOudpdYFxHjQfG3kGaV_tMvYwfsp1ACv9kWuwwfQBtVdTV1yxoMT_miW3OD/exec'; // Substitua pelo ID do seu script
-      const table = document.getElementById('data-table');
-      const rows = table.querySelectorAll('tbody tr');
-
-      const dataToSend = [];
-      rows.forEach(row => {
-        const cells = row.querySelectorAll('td');
-        const rowData = Array.from(cells).map(cell => cell.textContent);
-        dataToSend.push(rowData);
-      });
+      const dataToSend = {
+        data: [extractedData]  // Envia os dados como uma lista de listas (linha por linha)
+      };
 
       try {
         const response = await fetch(url, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ data: dataToSend })
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(dataToSend),
         });
 
         const result = await response.json();
