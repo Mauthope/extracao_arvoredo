@@ -59,8 +59,6 @@
     document.getElementById('xlsx-file').addEventListener('change', handleFileUpload);
     document.getElementById('send-data').addEventListener('click', handleDataSend);
 
-    let extractedData = [];
-
     function handleFileUpload(event) {
       const file = event.target.files[0];
       if (!file) {
@@ -70,102 +68,67 @@
 
       const reader = new FileReader();
       reader.onload = function (e) {
-        const data = e.target.result;
-        const workbook = XLSX.read(data, { type: 'binary' });
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
 
-        // Supondo que os dados estejam na primeira planilha
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const jsonData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
 
-        // Células que devemos extrair (com base nas coordenadas fornecidas)
-        const cellReferences = [
-          "A6", "F6", "H6", "I6", "CN6", "CO6", "CP6", "CR6", "CS6", "CT6",
-          "DA6", "DD6", "DE6", "DI6", "DQ6", "EG6", "EM6", "EN6", "EO6",
-          "EP6", "FB6", "FL6", "FV6", "FY6", "FZ6", "GE6", "GF6"
-        ];
-
-        // Extrair os dados das células
-        extractedData = cellReferences.map(ref => {
-          const cell = sheet[ref];
-          return cell ? cell.v : ""; // Retorna o valor da célula ou uma string vazia caso não haja valor
-        });
-
-        // Exibir os dados na tabela para visualização
-        displayDataInTable(extractedData);
+        displayDataInTable(jsonData);
       };
 
-      reader.readAsBinaryString(file);
+      reader.readAsArrayBuffer(file);
     }
 
     function displayDataInTable(data) {
       const tableBody = document.querySelector('#data-table tbody');
-      tableBody.innerHTML = '';  // Limpa a tabela antes de adicionar novas linhas
+      tableBody.innerHTML = ''; // Limpa a tabela antes de adicionar novas linhas
 
-      // Adiciona uma linha para os dados extraídos
-      const row = document.createElement('tr');
-      data.forEach(item => {
-        const cell = document.createElement('td');
-        cell.textContent = item;
-        row.appendChild(cell);
-      });
-
-      tableBody.appendChild(row);
+      // Insere os dados na tabela
+      for (let i = 1; i < data.length; i++) { // Começa da segunda linha (índice 1) para ignorar o cabeçalho
+        const row = document.createElement('tr');
+        data[i].forEach(item => {
+          const cell = document.createElement('td');
+          cell.textContent = item || '';
+          row.appendChild(cell);
+        });
+        tableBody.appendChild(row);
+      }
 
       // Exibe a tabela
       document.getElementById('data-table').style.display = 'table';
     }
 
+    function extractDataFromTable() {
+      const rows = document.querySelectorAll('#data-table tbody tr');
+      const extractedData = [];
+
+      rows.forEach(row => {
+        const rowData = Array.from(row.cells).map(cell => cell.textContent);
+        extractedData.push(rowData);
+      });
+
+      return extractedData;
+    }
+
     async function handleDataSend() {
+      const extractedData = extractDataFromTable();
       if (extractedData.length === 0) {
         alert('Nenhum dado carregado. Por favor, faça o upload de um arquivo XLSX antes de enviar.');
         return;
       }
 
       const url = 'https://script.google.com/macros/s/AKfycbxIBjwHVPOudpdYFxHjQfG3kGaV_tMvYwfsp1ACv9kWuwwfQBtVdTV1yxoMT_miW3OD/exec'; // Substitua pelo ID do seu script
-      const formData = new FormData();
-
-      const requestData = {
-        cliente: extractedData[0] || "",
-        entrada: extractedData[1] || "",
-        codigoBarras: extractedData[2] || "",
-        descricao: extractedData[3] || "",
-        ms: extractedData[4] || "",
-        umidade: extractedData[5] || "",
-        fda: extractedData[6] || "",
-        fdnmo: extractedData[7] || "",
-        lignina: extractedData[8] || "",
-        amido: extractedData[9] || "",
-        pBruta: extractedData[10] || "",
-        pida: extractedData[11] || "",
-        pidn: extractedData[12] || "",
-        pSoluvel: extractedData[13] || "",
-        ee: extractedData[14] || "",
-        cinzas: extractedData[15] || "",
-        ph: extractedData[16] || "",
-        aLatico: extractedData[17] || "",
-        aAcetico: extractedData[18] || "",
-        aButirico: extractedData[19] || "",
-        dFDNp48h: extractedData[20] || "",
-        uFDN240h: extractedData[21] || "",
-        digInSituAmido7h: extractedData[22] || "",
-        kdFDN: extractedData[23] || "",
-        kdAmido: extractedData[24] || "",
-        ndt: extractedData[25] || "",
-        milkTon: extractedData[26] || "",
-      };
-
-      // Adiciona os dados ao FormData para envio
-      for (const key in requestData) {
-        formData.append(key, requestData[key]);
-      }
 
       try {
         const response = await fetch(url, {
           method: 'POST',
-          body: formData,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ data: extractedData })
         });
 
         const result = await response.json();
-        document.getElementById('status').innerText = result.message;
+        document.getElementById('status').innerText = result.message || 'Dados enviados com sucesso!';
       } catch (error) {
         console.error('Erro ao enviar os dados:', error);
         document.getElementById('status').innerText = 'Erro ao enviar os dados.';
