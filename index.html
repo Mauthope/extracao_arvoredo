@@ -97,6 +97,7 @@
         let jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
         // Coletando dados das células específicas (de A6 até GF6)
+        sheetData = [];
         for (let i = 5; i < jsonData.length; i++) {
           let row = jsonData[i];
           sheetData.push({
@@ -130,6 +131,7 @@
           });
         }
 
+        // Exibindo os dados na tabela
         displayTable(sheetData);
       };
 
