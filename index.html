@@ -120,19 +120,48 @@
         return;
       }
 
-      const url = 'https://script.google.com/macros/s/AKfycbxIBjwHVPOudpdYFxHjQfG3kGaV_tMvYwfsp1ACv9kWuwwfQBtVdTV1yxoMT_miW3OD/exec'; // Substitua pela URL do seu script
+      const url = 'https://script.google.com/macros/s/AKfycbxIBjwHVPOudpdYFxHjQfG3kGaV_tMvYwfsp1ACv9kWuwwfQBtVdTV1yxoMT_miW3OD/exec'; // Substitua pelo ID do seu script
+      const formData = new FormData();
 
-      const dataToSend = {
-        data: [extractedData]  // Envia os dados como uma lista de listas (linha por linha)
+      const requestData = {
+        cliente: extractedData[0] || "",
+        entrada: extractedData[1] || "",
+        codigoBarras: extractedData[2] || "",
+        descricao: extractedData[3] || "",
+        ms: extractedData[4] || "",
+        umidade: extractedData[5] || "",
+        fda: extractedData[6] || "",
+        fdnmo: extractedData[7] || "",
+        lignina: extractedData[8] || "",
+        amido: extractedData[9] || "",
+        pBruta: extractedData[10] || "",
+        pida: extractedData[11] || "",
+        pidn: extractedData[12] || "",
+        pSoluvel: extractedData[13] || "",
+        ee: extractedData[14] || "",
+        cinzas: extractedData[15] || "",
+        ph: extractedData[16] || "",
+        aLatico: extractedData[17] || "",
+        aAcetico: extractedData[18] || "",
+        aButirico: extractedData[19] || "",
+        dFDNp48h: extractedData[20] || "",
+        uFDN240h: extractedData[21] || "",
+        digInSituAmido7h: extractedData[22] || "",
+        kdFDN: extractedData[23] || "",
+        kdAmido: extractedData[24] || "",
+        ndt: extractedData[25] || "",
+        milkTon: extractedData[26] || "",
       };
+
+      // Adiciona os dados ao FormData para envio
+      for (const key in requestData) {
+        formData.append(key, requestData[key]);
+      }
 
       try {
         const response = await fetch(url, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(dataToSend),
+          body: formData,
         });
 
         const result = await response.json();
