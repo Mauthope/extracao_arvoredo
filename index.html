@@ -4,13 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Importar Dados para Google Sheets</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 </head>
 <body>
   <h1>Importar Dados para Google Sheets</h1>
-  
+
   <!-- Formulário para upload do arquivo XLSX -->
   <input type="file" id="xlsx-file" accept=".xlsx">
-  <button onclick="uploadData()">Enviar Dados</button>
+  <button id="send-data">Enviar Dados</button>
 
   <!-- Tabela para visualizar os dados antes do envio -->
   <h3>Visualização dos Dados:</h3>
@@ -54,20 +55,22 @@
   <!-- Exibição de status -->
   <div id="status"></div>
 
-  <!-- Script do frontend -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
   <script>
-    async function uploadData() {
-      const fileInput = document.getElementById('xlsx-file');
-      const file = fileInput.files[0];
+    document.getElementById('xlsx-file').addEventListener('change', handleFileUpload);
+    document.getElementById('send-data').addEventListener('click', handleDataSend);
+
+    let extractedData = [];
+
+    function handleFileUpload(event) {
+      const file = event.target.files[0];
       if (!file) {
         alert('Por favor, selecione um arquivo XLSX.');
         return;
       }
 
       const reader = new FileReader();
-      reader.onload = function(event) {
-        const data = event.target.result;
+      reader.onload = function (e) {
+        const data = e.target.result;
         const workbook = XLSX.read(data, { type: 'binary' });
 
         // Supondo que os dados estejam na primeira planilha
@@ -75,24 +78,19 @@
 
         // Células que devemos extrair (com base nas coordenadas fornecidas)
         const cellReferences = [
-          "A6", "F6", "H6", "I6", "CN6", "CO6", "CP6", "CR6", "CS6", "CT6", 
-          "DA6", "DD6", "DE6", "DI6", "DQ6", "EG6", "EM6", "EN6", "EO6", 
+          "A6", "F6", "H6", "I6", "CN6", "CO6", "CP6", "CR6", "CS6", "CT6",
+          "DA6", "DD6", "DE6", "DI6", "DQ6", "EG6", "EM6", "EN6", "EO6",
           "EP6", "FB6", "FL6", "FV6", "FY6", "FZ6", "GE6", "GF6"
         ];
 
         // Extrair os dados das células
-        const extractedData = cellReferences.map(ref => {
+        extractedData = cellReferences.map(ref => {
           const cell = sheet[ref];
           return cell ? cell.v : ""; // Retorna o valor da célula ou uma string vazia caso não haja valor
         });
 
         // Exibir os dados na tabela para visualização
         displayDataInTable(extractedData);
-
-        // Quando o usuário clicar em "Enviar Dados", enviaremos os dados para o Google Sheets
-        document.querySelector('button').addEventListener('click', function() {
-          sendToGoogleSheets(extractedData);
-        });
       };
 
       reader.readAsBinaryString(file);
@@ -109,49 +107,53 @@
         cell.textContent = item;
         row.appendChild(cell);
       });
-      
+
       tableBody.appendChild(row);
-      
+
       // Exibe a tabela
       document.getElementById('data-table').style.display = 'table';
     }
 
-    async function sendToGoogleSheets(data) {
+    async function handleDataSend() {
+      if (extractedData.length === 0) {
+        alert('Nenhum dado carregado. Por favor, faça o upload de um arquivo XLSX antes de enviar.');
+        return;
+      }
+
       const url = 'https://script.google.com/macros/s/AKfycbxIBjwHVPOudpdYFxHjQfG3kGaV_tMvYwfsp1ACv9kWuwwfQBtVdTV1yxoMT_miW3OD/exec'; // Substitua pelo ID do seu script
       const formData = new FormData();
 
-      // Enviar os dados para a planilha do Google Sheets
       const requestData = {
-        cliente: data[0] || "",
-        entrada: data[1] || "",
-        codigoBarras: data[2] || "",
-        descricao: data[3] || "",
-        ms: data[4] || "",
-        umidade: data[5] || "",
-        fda: data[6] || "",
-        fdnmo: data[7] || "",
-        lignina: data[8] || "",
-        amido: data[9] || "",
-        pBruta: data[10] || "",
-        pida: data[11] || "",
-        pidn: data[12] || "",
-        pSoluvel: data[13] || "",
-        ee: data[14] || "",
-        cinzas: data[15] || "",
-        ph: data[16] || "",
-        aLatico: data[17] || "",
-        aAcetico: data[18] || "",
-        aButirico: data[19] || "",
-        dFDNp48h: data[20] || "",
-        uFDN240h: data[21] || "",
-        digInSituAmido7h: data[22] || "",
-        kdFDN: data[23] || "",
-        kdAmido: data[24] || "",
-        ndt: data[25] || "",
-        milkTon: data[26] || "",
+        cliente: extractedData[0] || "",
+        entrada: extractedData[1] || "",
+        codigoBarras: extractedData[2] || "",
+        descricao: extractedData[3] || "",
+        ms: extractedData[4] || "",
+        umidade: extractedData[5] || "",
+        fda: extractedData[6] || "",
+        fdnmo: extractedData[7] || "",
+        lignina: extractedData[8] || "",
+        amido: extractedData[9] || "",
+        pBruta: extractedData[10] || "",
+        pida: extractedData[11] || "",
+        pidn: extractedData[12] || "",
+        pSoluvel: extractedData[13] || "",
+        ee: extractedData[14] || "",
+        cinzas: extractedData[15] || "",
+        ph: extractedData[16] || "",
+        aLatico: extractedData[17] || "",
+        aAcetico: extractedData[18] || "",
+        aButirico: extractedData[19] || "",
+        dFDNp48h: extractedData[20] || "",
+        uFDN240h: extractedData[21] || "",
+        digInSituAmido7h: extractedData[22] || "",
+        kdFDN: extractedData[23] || "",
+        kdAmido: extractedData[24] || "",
+        ndt: extractedData[25] || "",
+        milkTon: extractedData[26] || "",
       };
 
-      // Enviar os dados via POST
+      // Adiciona os dados ao FormData para envio
       for (const key in requestData) {
         formData.append(key, requestData[key]);
       }
