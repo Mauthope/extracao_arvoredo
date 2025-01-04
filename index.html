@@ -1,176 +1,174 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Importar Dados para Google Sheets</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f9;
+      padding: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+    th, td {
+      padding: 8px;
+      text-align: left;
+    }
+    th {
+      background-color: #4CAF50;
+      color: white;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+  </style>
 </head>
 <body>
-  <h1>Importar Dados para Google Sheets</h1>
 
-  <!-- Formulário para upload do arquivo XLSX -->
-  <input type="file" id="xlsx-file" accept=".xlsx">
-  <button id="send-data">Enviar Dados</button>
+  <h1>Importar Dados da Planilha</h1>
+  <input type="file" id="file-input" accept=".xlsx"/>
+  <button onclick="submitData()">Enviar Dados</button>
 
-  <!-- Tabela para visualizar os dados antes do envio -->
-  <h3>Visualização dos Dados:</h3>
-  <table id="data-table" border="1" style="width: 100%; margin-bottom: 20px; display: none;">
+  <table id="data-table">
     <thead>
       <tr>
         <th>Cliente</th>
         <th>Entrada</th>
         <th>Código de Barras</th>
         <th>Descrição</th>
-        <th>MS</th>
+        <th>M.S</th>
         <th>Umidade</th>
         <th>FDA</th>
-        <th>FDNMO</th>
+        <th>FDNmo</th>
         <th>Lignina</th>
         <th>Amido</th>
-        <th>P Bruta</th>
+        <th>P. Bruta</th>
         <th>PIDA</th>
         <th>PIDN</th>
-        <th>P Solúvel</th>
-        <th>EE</th>
+        <th>P. Soluvel</th>
+        <th>E.E</th>
         <th>Cinzas</th>
         <th>pH</th>
-        <th>A Lático</th>
-        <th>A Acético</th>
-        <th>A Butírico</th>
-        <th>dFDN p/ 48h</th>
-        <th>uFDN p/ 240h</th>
-        <th>Dig. In Situ Amido 7h</th>
-        <th>Kd FDN</th>
-        <th>Kd Amido</th>
+        <th>A. Lático</th>
+        <th>A. Acético</th>
+        <th>A. Butírico</th>
+        <th>dFDNp 48h</th>
+        <th>uFDN 240h</th>
+        <th>Dig. In situ do Amido 7h</th>
+        <th>Kd do FDN</th>
+        <th>Kd do Amido</th>
         <th>NDT</th>
-        <th>Milk Ton</th>
+        <th>Milk/Ton</th>
       </tr>
     </thead>
     <tbody>
-      <!-- Os dados serão inseridos aqui dinamicamente -->
     </tbody>
   </table>
 
-  <!-- Exibição de status -->
-  <div id="status"></div>
-
   <script>
-    document.getElementById('xlsx-file').addEventListener('change', handleFileUpload);
-    document.getElementById('send-data').addEventListener('click', handleDataSend);
+    let sheetData = [];
 
-    let extractedData = [];
+    document.getElementById('file-input').addEventListener('change', (e) => {
+      let file = e.target.files[0];
+      let reader = new FileReader();
 
-    function handleFileUpload(event) {
-      const file = event.target.files[0];
-      if (!file) {
-        alert('Por favor, selecione um arquivo XLSX.');
-        return;
-      }
+      reader.onload = function(event) {
+        let data = new Uint8Array(event.target.result);
+        let workbook = XLSX.read(data, { type: 'array' });
+        
+        // Assumindo que os dados estão na primeira planilha
+        let worksheet = workbook.Sheets[workbook.SheetNames[0]];
+        let jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
-      const reader = new FileReader();
-      reader.onload = function (e) {
-        const data = e.target.result;
-        const workbook = XLSX.read(data, { type: 'binary' });
+        // Coletando dados das células específicas (de A6 até GF6)
+        for (let i = 5; i < jsonData.length; i++) {
+          let row = jsonData[i];
+          sheetData.push({
+            Cliente: row[0],
+            Entrada: row[5],
+            CodigoDeBarras: row[7],
+            Descricao: row[8],
+            MS: row[93],
+            Umidade: row[94],
+            FDA: row[95],
+            FDNmo: row[96],
+            Lignina: row[97],
+            Amido: row[98],
+            PBruta: row[99],
+            PIDA: row[100],
+            PIDN: row[101],
+            PSoluvel: row[102],
+            EE: row[104],
+            Cinzas: row[105],
+            pH: row[106],
+            ALactico: row[107],
+            AAcetico: row[108],
+            AButirico: row[109],
+            dFDNp48h: row[110],
+            uFDN240h: row[111],
+            DigInSituAmido7h: row[112],
+            KdFDN: row[113],
+            KdAmido: row[114],
+            NDT: row[115],
+            MilkTon: row[116]
+          });
+        }
 
-        // Supondo que os dados estejam na primeira planilha
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-
-        // Células que devemos extrair (com base nas coordenadas fornecidas)
-        const cellReferences = [
-          "A6", "F6", "H6", "I6", "CN6", "CO6", "CP6", "CR6", "CS6", "CT6",
-          "DA6", "DD6", "DE6", "DI6", "DQ6", "EG6", "EM6", "EN6", "EO6",
-          "EP6", "FB6", "FL6", "FV6", "FY6", "FZ6", "GE6", "GF6"
-        ];
-
-        // Extrair os dados das células
-        extractedData = cellReferences.map(ref => {
-          const cell = sheet[ref];
-          return cell ? cell.v : ""; // Retorna o valor da célula ou uma string vazia caso não haja valor
-        });
-
-        // Exibir os dados na tabela para visualização
-        displayDataInTable(extractedData);
+        displayTable(sheetData);
       };
 
-      reader.readAsBinaryString(file);
-    }
+      reader.readAsArrayBuffer(file);
+    });
 
-    function displayDataInTable(data) {
-      const tableBody = document.querySelector('#data-table tbody');
-      tableBody.innerHTML = '';  // Limpa a tabela antes de adicionar novas linhas
+    function displayTable(data) {
+      const tbody = document.getElementById('data-table').getElementsByTagName('tbody')[0];
+      tbody.innerHTML = ""; // Limpar a tabela antes de exibir os dados
 
-      // Adiciona uma linha para os dados extraídos
-      const row = document.createElement('tr');
-      data.forEach(item => {
-        const cell = document.createElement('td');
-        cell.textContent = item;
-        row.appendChild(cell);
+      data.forEach((rowData) => {
+        let row = document.createElement('tr');
+        for (let key in rowData) {
+          let cell = document.createElement('td');
+          cell.textContent = rowData[key];
+          row.appendChild(cell);
+        }
+        tbody.appendChild(row);
       });
-
-      tableBody.appendChild(row);
-
-      // Exibe a tabela
-      document.getElementById('data-table').style.display = 'table';
     }
 
-    async function handleDataSend() {
-      if (extractedData.length === 0) {
-        alert('Nenhum dado carregado. Por favor, faça o upload de um arquivo XLSX antes de enviar.');
-        return;
-      }
-
-      const url = 'https://script.google.com/macros/s/AKfycbxIBjwHVPOudpdYFxHjQfG3kGaV_tMvYwfsp1ACv9kWuwwfQBtVdTV1yxoMT_miW3OD/exec'; // Substitua pelo ID do seu script
-      const formData = new FormData();
-
-      const requestData = {
-        cliente: extractedData[0] || "",
-        entrada: extractedData[1] || "",
-        codigoBarras: extractedData[2] || "",
-        descricao: extractedData[3] || "",
-        ms: extractedData[4] || "",
-        umidade: extractedData[5] || "",
-        fda: extractedData[6] || "",
-        fdnmo: extractedData[7] || "",
-        lignina: extractedData[8] || "",
-        amido: extractedData[9] || "",
-        pBruta: extractedData[10] || "",
-        pida: extractedData[11] || "",
-        pidn: extractedData[12] || "",
-        pSoluvel: extractedData[13] || "",
-        ee: extractedData[14] || "",
-        cinzas: extractedData[15] || "",
-        ph: extractedData[16] || "",
-        aLatico: extractedData[17] || "",
-        aAcetico: extractedData[18] || "",
-        aButirico: extractedData[19] || "",
-        dFDNp48h: extractedData[20] || "",
-        uFDN240h: extractedData[21] || "",
-        digInSituAmido7h: extractedData[22] || "",
-        kdFDN: extractedData[23] || "",
-        kdAmido: extractedData[24] || "",
-        ndt: extractedData[25] || "",
-        milkTon: extractedData[26] || "",
-      };
-
-      // Adiciona os dados ao FormData para envio
-      for (const key in requestData) {
-        formData.append(key, requestData[key]);
-      }
-
-      try {
-        const response = await fetch(url, {
-          method: 'POST',
-          body: formData,
-        });
-
-        const result = await response.json();
-        document.getElementById('status').innerText = result.message;
-      } catch (error) {
+    function submitData() {
+      // Enviar os dados para o Google Sheets usando o App Script
+      const url = 'https://script.google.com/macros/s/SEU_SCRIPT_URL/exec'; // Substitua pelo seu App Script URL
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(sheetData)
+      })
+      .then(response => response.json())
+      .then(data => alert('Dados enviados com sucesso!'))
+      .catch(error => {
         console.error('Erro ao enviar os dados:', error);
-        document.getElementById('status').innerText = 'Erro ao enviar os dados.';
-      }
+        alert('Ocorreu um erro ao enviar os dados.');
+      });
     }
   </script>
+
 </body>
 </html>
