@@ -90,34 +90,38 @@
             reader.readAsArrayBuffer(file);
         }
 
-        async function sendToGoogleSheets() {
-            const sheetId = '16F5ePovxKQxCDL_j6Adxi2KTyFMRV2SMfufw6jqkdeg'; // Substitua pelo ID da sua planilha
-            const apiKey = '1A5tcg-VnAxJANh2NqL4k5AyMVGS7nlh8e8JCCsxDryMZCAKl6HW8bHkd'; // Substitua pela sua chave de API
-            const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/A1:append?valueInputOption=RAW&key=${apiKey}`;
+       async function sendToGoogleSheets() {
+    const scriptUrl = 'https://script.google.com/macros/s/AKfycbxQSY46agkwGpgjGTPxRArL_UTpUaM0NUu4sc9172ovXc9igY8LqR55NV3aD1qmnuY_/exec';
 
-            const body = {
-                values: [extractedData]
-            };
+    const body = {
+        values: extractedData
+    };
 
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(body)
-                });
+    try {
+        const response = await fetch(scriptUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(body)
+        });
 
-                if (response.ok) {
-                    alert('Dados enviados para o Google Sheets com sucesso!');
-                } else {
-                    alert('Erro ao enviar os dados para o Google Sheets.');
-                }
-            } catch (error) {
-                console.error('Erro ao enviar os dados:', error);
-                alert('Erro ao enviar os dados para o Google Sheets. Verifique a conexão ou as configurações.');
+        if (response.ok) {
+            const result = await response.json();
+            if (result.status === 'success') {
+                alert('Dados enviados para o Google Sheets com sucesso!');
+            } else {
+                alert('Erro: ' + result.message);
             }
+        } else {
+            alert('Erro ao enviar os dados para o Google Sheets.');
         }
+    } catch (error) {
+        console.error('Erro ao enviar os dados:', error);
+        alert('Erro ao enviar os dados para o Google Sheets. Verifique a conexão ou as configurações.');
+    }
+}
+
     </script>
 </body>
 </html>
