@@ -1,142 +1,307 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Extrair Dados de Excel</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-        label {
-            font-weight: bold;
-        }
-        .data-container {
-            margin-top: 20px;
-        }
-        .data-item {
-            margin-bottom: 10px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Formulário com Localização</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f9f9f9;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      width: 80%;
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    input, select, button {
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      margin-top: 20px;
+      background: #5cb85c;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #4cae4c;
+    }
+
+    #map {
+      margin-top: 15px;
+      width: 100%;
+      height: 300px;
+      display: none;
+    }
+  </style>
 </head>
 <body>
-    <h1>Extrair Dados de Planilha Excel</h1>
-    <input type="file" id="fileInput" accept=".xlsx" />
-    <button id="sendToSheets" disabled>Enviar para Google Sheets</button>
+  <div class="container">
+     <div style="text-align: center; margin-bottom: 20px;">
+    <img src="https://th.bing.com/th/id/R.1d28d53e94518beab66fcea9aa29ba6d?rik=omvtwv5JhZw7Xw&riu=http%3a%2f%2ffrigorificoarvoredo.com.br%2fblog%2fwp-content%2fthemes%2f2op%2fimages%2farvoredo-facebook.jpg&ehk=eRCT9QZH2qJskR3EC4yypW2NHrWR1hbo6zflcj6F804%3d&risl=&pid=ImgRaw&r=0" alt="Imagem" style="max-width: 100%; height: auto;">
+  </div>
+    <h1>Formulário com Localização</h1>
+    <form id="propriedadeForm">
+      <label for="nomePropriedade">Nome da Propriedade:</label>
+      <input type="text" id="nomePropriedade" name="nomePropriedade" required>
 
-    <div class="data-container" id="dataContainer">
-        <!-- Os campos extraídos serão exibidos aqui -->
-    </div>
+      <label for="dataVisita">Data da Visita:</label>
+      <input type="date" id="dataVisita" name="dataVisita" required>
+      
+      <label for="producaoLeite">Produção de Leite (L):</label>
+      <input type="number" id="producaoLeite" name="producaoLeite" required>
 
-    <script>
-        // Mapear os labels para as células correspondentes
-        const labels = [
-            "Cliente", "Entrada", "Código de Barras", "Descrição", "M.S", "Umidade", "FDA", "FDNmo", "Lignina",
-            "Amido", "P. Bruta", "PIDA", "PIDN", "P. Solúvel", "E.E", "Cinzas", "pH", "A. Láctico", "A. Acético",
-            "A. Butírico", "dFDNp 48h", "uFDN 240h", "Dig. In situ do Amido 7h", "Kd do FDN", "Kd do Amido", "NDT", "Milk/Ton"
-        ];
+      <label for="vacasLactacao">Número de Vacas em Lactação:</label>
+      <input type="number" id="vacasLactacao" name="vacasLactacao" required>
 
-        const cells = [
-            "A6", "F6", "H6", "I6", "CN6", "CO6", "CP6", "CR6", "CS6", "CT6",
-            "DA6", "DD6", "DE6", "DI6", "DQ6", "EG6", "EM6", "EN6", "EO6",
-            "EP6", "FB6", "FL6", "FV6", "FY6", "FZ6", "GE6", "GF6"
-        ];
+      <label for="quantPrimiparas">Quantidade de Primíparas:</label>
+      <input type="number" id="quantPrimiparas" name="quantPrimiparas" required>
 
-        let extractedData = [];
+      <label for="mediaLeite">Média de Leite (L):</label>
+      <input type="number" id="mediaLeite" name="mediaLeite" step="0.1" required>
 
-        document.getElementById('fileInput').addEventListener('change', handleFile, false);
-        document.getElementById('sendToSheets').addEventListener('click', sendToGoogleSheets, false);
+      <fieldset>
+        <legend>Lotes</legend>
+        <label for="lote1">Lote 1 (quantas vacas):</label>
+        <input type="number" id="lote1" name="lote1" required>
 
-        function handleFile(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+        <label for="lote2">Lote 2 (quantas vacas):</label>
+        <input type="number" id="lote2" name="lote2" required>
 
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
+        <label for="lote3">Lote 3 (quantas vacas):</label>
+        <input type="number" id="lote3" name="lote3" required>
+      </fieldset>
 
-                // Supondo que os dados estão na primeira aba
-                const sheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[sheetName];
+      <label for="delMedio">Del Médio (dias):</label>
+      <input type="number" id="delMedio" name="delMedio" required>
 
-                const dataContainer = document.getElementById('dataContainer');
-                dataContainer.innerHTML = ''; // Limpar antes de exibir novos dados
-                extractedData = []; // Limpar dados extraídos
+      <label for="tmrComposicao">TMR Composição:</label>
+      <input type="text" id="tmrComposicao" name="tmrComposicao" required>
 
-                labels.forEach((label, index) => {
-                    const cellValue = worksheet[cells[index]] ? worksheet[cells[index]].v : 'N/A';
-                    extractedData.push(cellValue);
+      <label for="kgSilagem">Quantos kg de Silagem:</label>
+      <input type="number" id="kgSilagem" name="kgSilagem" step="0.1" required>
 
-                    const dataItem = document.createElement('div');
-                    dataItem.classList.add('data-item');
+      <label for="kgFeno">Quantos kg de Feno:</label>
+      <input type="number" id="kgFeno" name="kgFeno" step="0.1" required>
 
-                    const labelElement = document.createElement('label');
-                    labelElement.textContent = `${label}: `;
+      <label for="kgPreSecado">Quantos kg de Pré-secado:</label>
+      <input type="number" id="kgPreSecado" name="kgPreSecado" step="0.1" required>
 
-                    const valueElement = document.createElement('span');
-                    valueElement.textContent = cellValue;
+      <label for="kgRacao">Quantos kg de Ração:</label>
+      <input type="number" id="kgRacao" name="kgRacao" step="0.1" required>
 
-                    dataItem.appendChild(labelElement);
-                    dataItem.appendChild(valueElement);
-                    dataContainer.appendChild(dataItem);
-                });
+      <label for="sobrasCoxo">Quantidade de Sobras no Cocho:</label>
+      <input type="number" id="sobrasCoxo" name="sobrasCoxo" step="0.1" required>
 
-                document.getElementById('sendToSheets').disabled = false;
-            };
+      <label for="tempoSilagem">Tempo disponível de Silagem, Feno e Pré-secado (dias):</label>
+      <input type="number" id="tempoSilagem" name="tempoSilagem" required>
 
-            reader.readAsArrayBuffer(file);
-        }
+      <label for="vacasPreParto">Número de Vacas em Pré-parto:</label>
+      <input type="number" id="vacasPreParto" name="vacasPreParto" required>
 
-        async function sendToGoogleSheets() {
-            // Verifica se a geolocalização está disponível
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(position) {
-                    // Obtém as coordenadas
-                    const latitude = position.coords.latitude;
-                    const longitude = position.coords.longitude;
+      <label for="dietaPreParto">Dieta no Pré-parto:</label>
+      <select id="dietaPreParto" name="dietaPreParto" required>
+        <option value="sim">Sim</option>
+        <option value="nao">Não</option>
+      </select>
 
-                    // Adiciona as coordenadas ao objeto formData
-                    const formData = {
-                        values: extractedData,
-                        latitude: latitude,
-                        longitude: longitude
-                    };
+      <label for="escoreCocho">Escore de Cocho:</label>
+      <input type="number" id="escoreCocho" name="escoreCocho" step="0.1" required>
 
-                    const scriptUrl = 'https://script.google.com/macros/s/AKfycbxQSY46agkwGpgjGTPxRArL_UTpUaM0NUu4sc9172ovXc9igY8LqR55NV3aD1qmnuY_/exec';
+      <label for="escoreCorporal">Escore Condição Corporal:</label>
+      <input type="number" id="escoreCorporal" name="escoreCorporal" step="0.1" required>
 
-                    try {
-                        const response = await fetch(scriptUrl, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify(formData)
-                        });
+      <!-- Campo para localização -->
+      <label>Localização da Propriedade:</label>
+      <button type="button" id="getLocation">Adicionar Localização</button>
+      <div id="map"></div>
 
-                        if (response.ok) {
-                            const result = await response.json();
-                            if (result.status === 'success') {
-                                alert('Dados enviados para o Google Sheets com sucesso!');
-                            } else {
-                                alert('Erro: ' + result.message);
-                            }
-                        } else {
-                            alert('Erro ao enviar os dados para o Google Sheets.');
-                        }
-                    } catch (error) {
-                        console.error('Erro ao enviar os dados:', error);
-                        alert('Erro ao enviar os dados para o Google Sheets. Verifique a conexão ou as configurações.');
-                    }
-                }, function(error) {
-                    alert('Erro ao obter geolocalização: ' + error.message);
-                });
-            } else {
-                alert('Geolocalização não é suportada pelo navegador.');
-            }
-        }
-    </script>
+      <button type="submit">Enviar</button>
+    </form>
+  </div>
+
+  <script>
+    const getLocationButton = document.getElementById('getLocation');
+    const mapDiv = document.getElementById('map');
+
+    getLocationButton.addEventListener('click', () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(showPosition, showError);
+      } else {
+        alert('Geolocalização não é suportada pelo seu navegador.');
+      }
+    });
+
+    function showPosition(position) {
+      const latitude = position.coords.latitude;
+      const longitude = position.coords.longitude;
+
+      // Exibe o mapa
+      mapDiv.style.display = 'block';
+      mapDiv.innerHTML = `<iframe 
+        width="100%" 
+        height="100%" 
+        frameborder="0" 
+        style="border:0" 
+        src="https://www.google.com/maps?q=${latitude},${longitude}&z=15&output=embed">
+      </iframe>`;
+    }
+
+    function showError(error) {
+      switch (error.code) {
+        case error.PERMISSION_DENIED:
+          alert('Usuário negou a permissão de localização.');
+          break;
+        case error.POSITION_UNAVAILABLE:
+          alert('Informações de localização estão indisponíveis.');
+          break;
+        case error.TIMEOUT:
+          alert('A requisição de localização demorou muito.');
+          break;
+        case error.UNKNOWN_ERROR:
+          alert('Ocorreu um erro desconhecido.');
+          break;
+      }
+    }
+
+    // Função para armazenar os dados no localStorage
+    function saveFormData() {
+      const formData = {
+        nomePropriedade: document.getElementById('nomePropriedade').value,
+        dataVisita: document.getElementById('dataVisita').value,
+        producaoLeite: document.getElementById('producaoLeite').value,
+        vacasLactacao: document.getElementById('vacasLactacao').value,
+        quantPrimiparas: document.getElementById('quantPrimiparas').value,
+        mediaLeite: document.getElementById('mediaLeite').value,
+        lote1: document.getElementById('lote1').value,
+        lote2: document.getElementById('lote2').value,
+        lote3: document.getElementById('lote3').value,
+        delMedio: document.getElementById('delMedio').value,
+        tmrComposicao: document.getElementById('tmrComposicao').value,
+        kgSilagem: document.getElementById('kgSilagem').value,
+        kgFeno: document.getElementById('kgFeno').value,
+        kgPreSecado: document.getElementById('kgPreSecado').value,
+        kgRacao: document.getElementById('kgRacao').value,
+        sobrasCoxo: document.getElementById('sobrasCoxo').value,
+        tempoSilagem: document.getElementById('tempoSilagem').value,
+        vacasPreParto: document.getElementById('vacasPreParto').value,
+        dietaPreParto: document.getElementById('dietaPreParto').value,
+        escoreCocho: document.getElementById('escoreCocho').value,
+        escoreCorporal: document.getElementById('escoreCorporal').value,
+      };
+
+      const storedData = JSON.parse(localStorage.getItem('formData')) || [];
+      storedData.push(formData);
+      localStorage.setItem('formData', JSON.stringify(storedData));
+    }
+
+    // Função para enviar os dados para o Google Sheets (via API)
+  // Função para enviar os dados para o Google Sheets (via API)
+function sendToGoogleSheets(formData) {
+  // Verifica se a geolocalização está disponível
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(position) {
+      // Obtém as coordenadas
+      const latitude = position.coords.latitude;
+      const longitude = position.coords.longitude;
+
+      // Adiciona as coordenadas ao objeto formData
+      formData.latitude = latitude;
+      formData.longitude = longitude;
+
+      // ID da planilha e URL do script do Google Apps
+      const sheetID = '1gpgYrvpDkclasMPR3CLRSZ3cx2CSHWVlpSf0NcG40wA'; // Substitua com o ID da sua planilha
+      const scriptURL = `https://script.google.com/macros/s/AKfycbyoXrmiK2QhQSQtfkQyTMuJA2x5fcuSMwEsmvh0db9hCCZhtzjDryF8XVvWXV_vhDjZaw/exec`;
+
+      // Envia os dados via POST
+      fetch(scriptURL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: new URLSearchParams(formData)
+      })
+        .then(response => {
+          if (response.ok) {
+            alert('Dados enviados com sucesso!');
+          } else {
+            alert('Erro ao enviar dados');
+          }
+        })
+        .catch(error => {
+          alert('Erro ao enviar dados: ' + error.message);
+        });
+    }, function(error) {
+      alert('Erro ao obter localização: ' + error.message);
+    });
+  } else {
+    alert('Geolocalização não é suportada neste navegador.');
+  }
+}
+
+
+    // Envia os dados ao submeter o formulário
+    document.getElementById('propriedadeForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+
+      const formData = {
+        nomePropriedade: document.getElementById('nomePropriedade').value,
+        dataVisita: document.getElementById('dataVisita').value,
+        producaoLeite: document.getElementById('producaoLeite').value,
+        vacasLactacao: document.getElementById('vacasLactacao').value,
+        quantPrimiparas: document.getElementById('quantPrimiparas').value,
+        mediaLeite: document.getElementById('mediaLeite').value,
+        lote1: document.getElementById('lote1').value,
+        lote2: document.getElementById('lote2').value,
+        lote3: document.getElementById('lote3').value,
+        delMedio: document.getElementById('delMedio').value,
+        tmrComposicao: document.getElementById('tmrComposicao').value,
+        kgSilagem: document.getElementById('kgSilagem').value,
+        kgFeno: document.getElementById('kgFeno').value,
+        kgPreSecado: document.getElementById('kgPreSecado').value,
+        kgRacao: document.getElementById('kgRacao').value,
+        sobrasCoxo: document.getElementById('sobrasCoxo').value,
+        tempoSilagem: document.getElementById('tempoSilagem').value,
+        vacasPreParto: document.getElementById('vacasPreParto').value,
+        dietaPreParto: document.getElementById('dietaPreParto').value,
+        escoreCocho: document.getElementById('escoreCocho').value,
+        escoreCorporal: document.getElementById('escoreCorporal').value,
+      };
+
+      // Armazenar os dados offline e enviar para o Google Sheets
+      saveFormData();
+      sendToGoogleSheets(formData);
+    });
+  </script>
 </body>
 </html>
