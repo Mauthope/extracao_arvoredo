@@ -1,77 +1,174 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Importar Dados da Planilha</title>
+  <title>Importar Dados para Google Sheets</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 </head>
 <body>
-  <h1>Importar Dados da Planilha</h1>
+  <h1>Importar Dados para Google Sheets</h1>
 
-  <input type="file" id="file-input" accept=".xlsx, .xls" />
-  <button onclick="sendData()">Enviar Dados para o Google Sheets</button>
+  <!-- Formulário para upload do arquivo XLSX -->
+  <input type="file" id="xlsx-file" accept=".xlsx">
+  <button id="send-data">Enviar Dados</button>
+
+  <!-- Tabela para visualizar os dados antes do envio -->
+  <h3>Visualização dos Dados:</h3>
+  <table id="data-table" border="1" style="width: 100%; margin-bottom: 20px; display: none;">
+    <thead>
+      <tr>
+        <th>Cliente</th>
+        <th>Entrada</th>
+        <th>Código de Barras</th>
+        <th>Descrição</th>
+        <th>MS</th>
+        <th>Umidade</th>
+        <th>FDA</th>
+        <th>FDNMO</th>
+        <th>Lignina</th>
+        <th>Amido</th>
+        <th>P Bruta</th>
+        <th>PIDA</th>
+        <th>PIDN</th>
+        <th>P Solúvel</th>
+        <th>EE</th>
+        <th>Cinzas</th>
+        <th>pH</th>
+        <th>A Lático</th>
+        <th>A Acético</th>
+        <th>A Butírico</th>
+        <th>dFDN p/ 48h</th>
+        <th>uFDN p/ 240h</th>
+        <th>Dig. In Situ Amido 7h</th>
+        <th>Kd FDN</th>
+        <th>Kd Amido</th>
+        <th>NDT</th>
+        <th>Milk Ton</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- Os dados serão inseridos aqui dinamicamente -->
+    </tbody>
+  </table>
+
+  <!-- Exibição de status -->
+  <div id="status"></div>
 
   <script>
+    document.getElementById('xlsx-file').addEventListener('change', handleFileUpload);
+    document.getElementById('send-data').addEventListener('click', handleDataSend);
+
     let extractedData = [];
 
-    // Função para ler e extrair os dados da planilha
-    function readExcel(file) {
+    function handleFileUpload(event) {
+      const file = event.target.files[0];
+      if (!file) {
+        alert('Por favor, selecione um arquivo XLSX.');
+        return;
+      }
+
       const reader = new FileReader();
       reader.onload = function (e) {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const sheet = workbook.Sheets[workbook.SheetNames[0]]; // A primeira planilha
-        extractedData = [
-          sheet["A6"]?.v, sheet["F6"]?.v, sheet["H6"]?.v, sheet["I6"]?.v, 
-          sheet["CN6"]?.v, sheet["CO6"]?.v, sheet["CP6"]?.v, sheet["CR6"]?.v,
-          sheet["CS6"]?.v, sheet["CT6"]?.v, sheet["DA6"]?.v, sheet["DD6"]?.v,
-          sheet["DE6"]?.v, sheet["DI6"]?.v, sheet["DQ6"]?.v, sheet["EG6"]?.v,
-          sheet["EM6"]?.v, sheet["EN6"]?.v, sheet["EO6"]?.v, sheet["EP6"]?.v,
-          sheet["FB6"]?.v, sheet["FL6"]?.v, sheet["FV6"]?.v, sheet["FY6"]?.v,
-          sheet["FZ6"]?.v, sheet["GE6"]?.v, sheet["GF6"]?.v
+        const data = e.target.result;
+        const workbook = XLSX.read(data, { type: 'binary' });
+
+        // Supondo que os dados estejam na primeira planilha
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+
+        // Células que devemos extrair (com base nas coordenadas fornecidas)
+        const cellReferences = [
+          "A6", "F6", "H6", "I6", "CN6", "CO6", "CP6", "CR6", "CS6", "CT6",
+          "DA6", "DD6", "DE6", "DI6", "DQ6", "EG6", "EM6", "EN6", "EO6",
+          "EP6", "FB6", "FL6", "FV6", "FY6", "FZ6", "GE6", "GF6"
         ];
-        console.log(extractedData); // Exibe os dados extraídos no console para checar
+
+        // Extrair os dados das células
+        extractedData = cellReferences.map(ref => {
+          const cell = sheet[ref];
+          return cell ? cell.v : ""; // Retorna o valor da célula ou uma string vazia caso não haja valor
+        });
+
+        // Exibir os dados na tabela para visualização
+        displayDataInTable(extractedData);
       };
-      reader.readAsArrayBuffer(file);
+
+      reader.readAsBinaryString(file);
     }
 
-    // Função chamada quando o usuário seleciona um arquivo
-    document.getElementById('file-input').addEventListener('change', function(e) {
-      const file = e.target.files[0];
-      if (file) {
-        readExcel(file);
+    function displayDataInTable(data) {
+      const tableBody = document.querySelector('#data-table tbody');
+      tableBody.innerHTML = '';  // Limpa a tabela antes de adicionar novas linhas
+
+      // Adiciona uma linha para os dados extraídos
+      const row = document.createElement('tr');
+      data.forEach(item => {
+        const cell = document.createElement('td');
+        cell.textContent = item;
+        row.appendChild(cell);
+      });
+
+      tableBody.appendChild(row);
+
+      // Exibe a tabela
+      document.getElementById('data-table').style.display = 'table';
+    }
+
+    async function handleDataSend() {
+      if (extractedData.length === 0) {
+        alert('Nenhum dado carregado. Por favor, faça o upload de um arquivo XLSX antes de enviar.');
+        return;
       }
-    });
 
-    // Função para enviar os dados extraídos para o Google Apps Script
-    async function sendData() {
-      if (extractedData.length > 0) {
-        const scriptURL = "https://script.google.com/macros/s/AKfycbxQSY46agkwGpgjGTPxRArL_UTpUaM0NUu4sc9172ovXc9igY8LqR55NV3aD1qmnuY_/exec";
-        
-        try {
-          const response = await fetch(scriptURL, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ data: extractedData }),
-          });
+      const url = '1A5tcg-VnAxJANh2NqL4k5AyMVGS7nlh8e8JCCsxDryMZCAKl6HW8bHkd'; // Substitua pelo ID do seu script
+      const formData = new FormData();
 
-          if (response.ok) {
-            const result = await response.json();
-            alert("Dados enviados com sucesso!");
-            console.log(result);
-          } else {
-            alert("Erro ao enviar os dados para o Google Sheets.");
-            console.error("Erro:", response.statusText);
-          }
-        } catch (error) {
-          alert("Erro na comunicação com o servidor.");
-          console.error("Erro:", error);
-        }
-      } else {
-        alert("Por favor, carregue uma planilha antes de enviar.");
+      const requestData = {
+        cliente: extractedData[0] || "",
+        entrada: extractedData[1] || "",
+        codigoBarras: extractedData[2] || "",
+        descricao: extractedData[3] || "",
+        ms: extractedData[4] || "",
+        umidade: extractedData[5] || "",
+        fda: extractedData[6] || "",
+        fdnmo: extractedData[7] || "",
+        lignina: extractedData[8] || "",
+        amido: extractedData[9] || "",
+        pBruta: extractedData[10] || "",
+        pida: extractedData[11] || "",
+        pidn: extractedData[12] || "",
+        pSoluvel: extractedData[13] || "",
+        ee: extractedData[14] || "",
+        cinzas: extractedData[15] || "",
+        ph: extractedData[16] || "",
+        aLatico: extractedData[17] || "",
+        aAcetico: extractedData[18] || "",
+        aButirico: extractedData[19] || "",
+        dFDNp48h: extractedData[20] || "",
+        uFDN240h: extractedData[21] || "",
+        digInSituAmido7h: extractedData[22] || "",
+        kdFDN: extractedData[23] || "",
+        kdAmido: extractedData[24] || "",
+        ndt: extractedData[25] || "",
+        milkTon: extractedData[26] || "",
+      };
+
+      // Adiciona os dados ao FormData para envio
+      for (const key in requestData) {
+        formData.append(key, requestData[key]);
+      }
+
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          body: formData,
+        });
+
+        const result = await response.json();
+        document.getElementById('status').innerText = result.message;
+      } catch (error) {
+        console.error('Erro ao enviar os dados:', error);
+        document.getElementById('status').innerText = 'Erro ao enviar os dados.';
       }
     }
   </script>
