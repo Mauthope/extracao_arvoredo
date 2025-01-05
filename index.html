@@ -5,7 +5,63 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Formulário de Análise de Amostra</title>
   <style>
-    /* Estilos CSS permanecem inalterados */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f9f9f9;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      width: 80%;
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    label {
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    input, select, button {
+      padding: 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      margin-top: 20px;
+      background: #5cb85c;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #4cae4c;
+    }
+
+    #map {
+      margin-top: 15px;
+      width: 100%;
+      height: 300px;
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -141,8 +197,8 @@
     // Função para enviar os dados para o Google Sheets (via API)
     function sendToGoogleSheets(formData) {
       // ID da planilha e URL do script do Google Apps
-      const sheetID = '1F-BudKkExs65hQuWLNQN3UPrl_J0xP0Uf4fF0piijL4'; // Substitua com o ID da sua planilha
-      const scriptURL = `https://script.google.com/macros/s/AKfycbwkt_tCIDrTLA-xCdckpviRPLGwM_kg1MmxpjhIlqnD-Qur_4zu9vDCm3L2Al0L7owi/exec`;
+      const sheetID = '1gpgYrvpDkclasMPR3CLRSZ3cx2CSHWVlpSf0NcG40wA'; // Substitua com o ID da sua planilha
+      const scriptURL = `https://script.google.com/macros/s/AKfycbyoXrmiK2QhQSQtfkQyTMuJA2x5fcuSMwEsmvh0db9hCCZhtzjDryF8XVvWXV_vhDjZaw/exec`;
 
       // Envia os dados via POST
       fetch(scriptURL, {
