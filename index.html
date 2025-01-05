@@ -24,6 +24,7 @@
 <body>
     <h1>Extrair Dados de Planilha Excel</h1>
     <input type="file" id="fileInput" accept=".xlsx" />
+    <button id="sendToSheets" disabled>Enviar para Google Sheets</button>
 
     <div class="data-container" id="dataContainer">
         <!-- Os campos extraídos serão exibidos aqui -->
@@ -43,7 +44,10 @@
             "EP6", "FB6", "FL6", "FV6", "FY6", "FZ6", "GE6", "GF6"
         ];
 
+        let extractedData = [];
+
         document.getElementById('fileInput').addEventListener('change', handleFile, false);
+        document.getElementById('sendToSheets').addEventListener('click', sendToGoogleSheets, false);
 
         function handleFile(event) {
             const file = event.target.files[0];
@@ -60,10 +64,12 @@
 
                 const dataContainer = document.getElementById('dataContainer');
                 dataContainer.innerHTML = ''; // Limpar antes de exibir novos dados
+                extractedData = []; // Limpar dados extraídos
 
                 labels.forEach((label, index) => {
                     const cellValue = worksheet[cells[index]] ? worksheet[cells[index]].v : 'N/A';
-                    
+                    extractedData.push(cellValue);
+
                     const dataItem = document.createElement('div');
                     dataItem.classList.add('data-item');
 
@@ -77,9 +83,40 @@
                     dataItem.appendChild(valueElement);
                     dataContainer.appendChild(dataItem);
                 });
+
+                document.getElementById('sendToSheets').disabled = false;
             };
 
             reader.readAsArrayBuffer(file);
+        }
+
+        async function sendToGoogleSheets() {
+            const sheetId = '16F5ePovxKQxCDL_j6Adxi2KTyFMRV2SMfufw6jqkdeg'; // Substitua pelo ID da sua planilha
+            const apiKey = 'SUA_CHAVE_API_AQUI'; // Substitua pela sua chave de API
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/A1:append?valueInputOption=RAW&key=${apiKey}`;
+
+            const body = {
+                values: [extractedData]
+            };
+
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                if (response.ok) {
+                    alert('Dados enviados para o Google Sheets com sucesso!');
+                } else {
+                    alert('Erro ao enviar os dados para o Google Sheets.');
+                }
+            } catch (error) {
+                console.error('Erro ao enviar os dados:', error);
+                alert('Erro ao enviar os dados para o Google Sheets. Verifique a conexão ou as configurações.');
+            }
         }
     </script>
 </body>
