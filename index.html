@@ -209,6 +209,8 @@ function sendToGoogleSheets(formData) {
     console.log('Resposta do servidor:', data);
     if (data.result === 'success') {
       alert(data.message);
+      console.log('Dados recebidos pelo servidor:', data.receivedData);
+      console.log('Dados salvos na planilha:', data.savedData);
     } else {
       alert('Erro ao enviar dados: ' + JSON.stringify(data));
     }
@@ -218,7 +220,6 @@ function sendToGoogleSheets(formData) {
     alert('Erro ao enviar dados: ' + error.message);
   });
 }
-
     // Envia os dados ao submeter o formulário
     document.getElementById('amostraForm').addEventListener('submit', function(event) {
       event.preventDefault();
