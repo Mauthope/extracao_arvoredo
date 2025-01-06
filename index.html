@@ -5,24 +5,158 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Formulário de Análise de Amostra</title>
   <style>
-    /* Mesma estilização fornecida */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: #555;
+    }
+
+    input[type="text"], input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    button {
+      background-color: #007BFF;
+      color: #fff;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .image-container {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .image-container img {
+      max-width: 100%;
+      height: auto;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <div style="text-align: center; margin-bottom: 20px;">
-      <img src="https://th.bing.com/th/id/R.1d28d53e94518beab66fcea9aa29ba6d?rik=omvtwv5JhZw7Xw&riu=http%3a%2f%2ffrigorificoarvoredo.com.br%2fblog%2fwp-content%2fthemes%2f2op%2fimages%2farvoredo-facebook.jpg&ehk=eRCT9QZH2qJskR3EC4yypW2NHrWR1hbo6zflcj6F804%3d&risl=&pid=ImgRaw&r=0" 
-           alt="Imagem" style="max-width: 100%; height: auto;">
+    <div class="image-container">
+      <img src="https://th.bing.com/th/id/R.1d28d53e94518beab66fcea9aa29ba6d?rik=omvtwv5JhZw7Xw&riu=http%3a%2f%2ffrigorificoarvoredo.com.br%2fblog%2fwp-content%2fthemes%2f2op%2fimages%2farvoredo-facebook.jpg&ehk=eRCT9QZH2qJskR3EC4yypW2NHrWR1hbo6zflcj6F804%3d&risl=&pid=ImgRaw&r=0" alt="Logo">
     </div>
     <h1>Formulário de Análise de Amostra</h1>
     <form id="amostraForm">
-      <!-- Campos do formulário conforme fornecido -->
+      <label for="cliente">Cliente:</label>
+      <input type="text" id="cliente" name="cliente" required>
+
+      <label for="entrada">Entrada:</label>
+      <input type="text" id="entrada" name="entrada" required>
+
+      <label for="codigoBarras">Código de Barras:</label>
+      <input type="text" id="codigoBarras" name="codigoBarras" required>
+
+      <label for="descricao">Descrição:</label>
+      <input type="text" id="descricao" name="descricao" required>
+
+      <label for="ms">MS:</label>
+      <input type="number" id="ms" name="ms" required>
+
+      <label for="umidade">Umidade:</label>
+      <input type="number" id="umidade" name="umidade" required>
+
+      <label for="fda">FDA:</label>
+      <input type="number" id="fda" name="fda" required>
+
+      <label for="fdnmo">FDNmo:</label>
+      <input type="number" id="fdnmo" name="fdnmo" required>
+
+      <label for="lignina">Lignina:</label>
+      <input type="number" id="lignina" name="lignina" required>
+
+      <label for="amido">Amido:</label>
+      <input type="number" id="amido" name="amido" required>
+
+      <label for="pBruta">PB Bruta:</label>
+      <input type="number" id="pBruta" name="pBruta" required>
+
+      <label for="pida">PIDA:</label>
+      <input type="number" id="pida" name="pida" required>
+
+      <label for="pidn">PIDN:</label>
+      <input type="number" id="pidn" name="pidn" required>
+
+      <label for="pSoluvel">P Solúvel:</label>
+      <input type="number" id="pSoluvel" name="pSoluvel" required>
+
+      <label for="ee">EE:</label>
+      <input type="number" id="ee" name="ee" required>
+
+      <label for="cinzas">Cinzas:</label>
+      <input type="number" id="cinzas" name="cinzas" required>
+
+      <label for="ph">pH:</label>
+      <input type="number" id="ph" name="ph" required>
+
+      <label for="aLactico">Ácido Lático:</label>
+      <input type="number" id="aLactico" name="aLactico" required>
+
+      <label for="aAcetico">Ácido Acético:</label>
+      <input type="number" id="aAcetico" name="aAcetico" required>
+
+      <label for="aButirico">Ácido Butírico:</label>
+      <input type="number" id="aButirico" name="aButirico" required>
+
+      <label for="dFDNp48h">dFDNp 48h:</label>
+      <input type="number" id="dFDNp48h" name="dFDNp48h" required>
+
+      <label for="uFDN240h">uFDN 240h:</label>
+      <input type="number" id="uFDN240h" name="uFDN240h" required>
+
+      <label for="digInSituAmido">Digestibilidade in Situ do Amido:</label>
+      <input type="number" id="digInSituAmido" name="digInSituAmido" required>
+
+      <label for="kdFdn">kdFDN:</label>
+      <input type="number" id="kdFdn" name="kdFdn" required>
+
+      <label for="kdAmido">kdAmido:</label>
+      <input type="number" id="kdAmido" name="kdAmido" required>
+
+      <label for="ndt">NDT:</label>
+      <input type="number" id="ndt" name="ndt" required>
+
+      <label for="milkTon">Milk/Ton:</label>
+      <input type="number" id="milkTon" name="milkTon" required>
+
       <button type="submit">Enviar</button>
     </form>
   </div>
 
   <script>
-    // Função para salvar dados no localStorage
     function saveFormData() {
       const formData = {
         cliente: document.getElementById('cliente').value,
@@ -59,7 +193,6 @@
       localStorage.setItem('formData', JSON.stringify(storedData));
     }
 
-    // Função para enviar dados para o Google Sheets
     async function sendToGoogleSheets(formData) {
       const scriptURL = 'https://script.google.com/macros/s/AKfycbyoXrmiK2QhQSQtfkQyTMuJA2x5fcuSMwEsmvh0db9hCCZhtzjDryF8XVvWXV_vhDjZaw/exec';
 
@@ -70,32 +203,21 @@
         });
 
         const data = await response.json();
-        console.log('Resposta do servidor:', data);
-
         if (data.result === 'success') {
-          alert(data.message || 'Dados enviados com sucesso!');
-          console.log('Detalhes:', data);
+          alert('Dados enviados com sucesso!');
         } else {
-          alert(`Erro ao enviar dados: ${data.message || 'Verifique o servidor.'}`);
+          alert('Erro ao enviar os dados: ' + (data.message || 'Desconhecido'));
         }
       } catch (error) {
-        console.error('Erro ao enviar os dados:', error);
-        alert('Erro na conexão. Tente novamente mais tarde.');
+        alert('Erro ao conectar ao servidor: ' + error.message);
       }
     }
 
-    // Evento do formulário
     document.getElementById('amostraForm').addEventListener('submit', function (event) {
-      event.preventDefault(); // Evitar recarregar página
+      event.preventDefault();
       const formData = new FormData(this);
-
-      // Salvar localmente
       saveFormData();
-
-      // Enviar para o Google Sheets
       sendToGoogleSheets(Object.fromEntries(formData.entries()));
-
-      // Resetar o formulário
       this.reset();
     });
   </script>
