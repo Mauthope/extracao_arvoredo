@@ -195,15 +195,29 @@
     }
 
     // Função para enviar os dados para o Google Sheets (via API)
-   function sendToGoogleSheets(formData) {
+function sendToGoogleSheets(formData) {
   const scriptURL = 'https://script.google.com/macros/s/AKfycbyoXrmiK2QhQSQtfkQyTMuJA2x5fcuSMwEsmvh0db9hCCZhtzjDryF8XVvWXV_vhDjZaw/exec'; // Certifique-se de que esta URL está correta
 
-  // Log dos dados sendo enviados
-  console.log('Dados sendo enviados:', formData);
+  // Definir a ordem correta dos campos
+  const fieldOrder = [
+    "cliente", "entrada", "codigoBarras", "descricao", "ms", "umidade",
+    "fda", "fdnmo", "lignina", "amido", "pBruta", "pida",
+    "pidn", "pSoluvel", "ee", "cinzas", "ph", "aLactico",
+    "aAcetico", "aButirico", "dFDNp48h", "uFDN240h",
+    "digInSituAmido", "kdFdn", "kdAmido", "ndt", "milkTon"
+  ];
+
+  // Criar um novo objeto com os dados na ordem correta
+  const orderedData = {};
+  fieldOrder.forEach(field => {
+    orderedData[field] = formData[field] || "";
+  });
+
+  console.log('Dados ordenados sendo enviados:', orderedData);
 
   fetch(scriptURL, {
     method: 'POST',
-    body: new URLSearchParams(formData)
+    body: new URLSearchParams(orderedData)
   })
   .then(response => response.json())
   .then(data => {
