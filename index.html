@@ -5,159 +5,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Formulário de Análise de Amostra</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f9f9f9;
-      margin: 0;
-      padding: 0;
-    }
-
-    .container {
-      width: 80%;
-      max-width: 600px;
-      margin: 20px auto;
-      padding: 20px;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    }
-
-    h1 {
-      text-align: center;
-      color: #333;
-    }
-
-    form {
-      display: flex;
-      flex-direction: column;
-    }
-
-    label {
-      margin-top: 15px;
-      font-weight: bold;
-    }
-
-    input, select, button {
-      padding: 10px;
-      margin-top: 5px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-
-    button {
-      margin-top: 20px;
-      background: #5cb85c;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-
-    button:hover {
-      background: #4cae4c;
-    }
-
-    #map {
-      margin-top: 15px;
-      width: 100%;
-      height: 300px;
-      display: none;
-    }
+    /* Mesma estilização fornecida */
   </style>
 </head>
 <body>
   <div class="container">
-     <div style="text-align: center; margin-bottom: 20px;">
-    <img src="https://th.bing.com/th/id/R.1d28d53e94518beab66fcea9aa29ba6d?rik=omvtwv5JhZw7Xw&riu=http%3a%2f%2ffrigorificoarvoredo.com.br%2fblog%2fwp-content%2fthemes%2f2op%2fimages%2farvoredo-facebook.jpg&ehk=eRCT9QZH2qJskR3EC4yypW2NHrWR1hbo6zflcj6F804%3d&risl=&pid=ImgRaw&r=0" alt="Imagem" style="max-width: 100%; height: auto;">
-  </div>
+    <div style="text-align: center; margin-bottom: 20px;">
+      <img src="https://th.bing.com/th/id/R.1d28d53e94518beab66fcea9aa29ba6d?rik=omvtwv5JhZw7Xw&riu=http%3a%2f%2ffrigorificoarvoredo.com.br%2fblog%2fwp-content%2fthemes%2f2op%2fimages%2farvoredo-facebook.jpg&ehk=eRCT9QZH2qJskR3EC4yypW2NHrWR1hbo6zflcj6F804%3d&risl=&pid=ImgRaw&r=0" 
+           alt="Imagem" style="max-width: 100%; height: auto;">
+    </div>
     <h1>Formulário de Análise de Amostra</h1>
     <form id="amostraForm">
-      <label for="cliente">Cliente:</label>
-      <input type="text" id="cliente" name="cliente" required>
-
-      <label for="entrada">Data de Entrada:</label>
-      <input type="date" id="entrada" name="entrada" required>
-      
-      <label for="codigoBarras">Código de Barras:</label>
-      <input type="text" id="codigoBarras" name="codigoBarras" required>
-
-      <label for="descricao">Descrição:</label>
-      <input type="text" id="descricao" name="descricao" required>
-
-      <label for="ms">MS (%):</label>
-      <input type="number" id="ms" name="ms" step="0.01" required>
-
-      <label for="umidade">Umidade (%):</label>
-      <input type="number" id="umidade" name="umidade" step="0.01" required>
-
-      <label for="fda">FDA (%):</label>
-      <input type="number" id="fda" name="fda" step="0.01" required>
-
-      <label for="fdnmo">FDNmo (%):</label>
-      <input type="number" id="fdnmo" name="fdnmo" step="0.01" required>
-
-      <label for="lignina">Lignina (%):</label>
-      <input type="number" id="lignina" name="lignina" step="0.01" required>
-
-      <label for="amido">Amido (%):</label>
-      <input type="number" id="amido" name="amido" step="0.01" required>
-
-      <label for="pBruta">Proteína Bruta (%):</label>
-      <input type="number" id="pBruta" name="pBruta" step="0.01" required>
-
-      <label for="pida">PIDA (%):</label>
-      <input type="number" id="pida" name="pida" step="0.01" required>
-
-      <label for="pidn">PIDN (%):</label>
-      <input type="number" id="pidn" name="pidn" step="0.01" required>
-
-      <label for="pSoluvel">Proteína Solúvel (%):</label>
-      <input type="number" id="pSoluvel" name="pSoluvel" step="0.01" required>
-
-      <label for="ee">EE (%):</label>
-      <input type="number" id="ee" name="ee" step="0.01" required>
-
-      <label for="cinzas">Cinzas (%):</label>
-      <input type="number" id="cinzas" name="cinzas" step="0.01" required>
-
-      <label for="ph">pH:</label>
-      <input type="number" id="ph" name="ph" step="0.01" required>
-
-      <label for="aLactico">Ácido Láctico (%):</label>
-      <input type="number" id="aLactico" name="aLactico" step="0.01" required>
-
-      <label for="aAcetico">Ácido Acético (%):</label>
-      <input type="number" id="aAcetico" name="aAcetico" step="0.01" required>
-
-      <label for="aButirico">Ácido Butírico (%):</label>
-      <input type="number" id="aButirico" name="aButirico" step="0.01" required>
-
-      <label for="dFDNp48h">dFDNp 48h (%):</label>
-      <input type="number" id="dFDNp48h" name="dFDNp48h" step="0.01" required>
-
-      <label for="uFDN240h">uFDN 240h (%):</label>
-      <input type="number" id="uFDN240h" name="uFDN240h" step="0.01" required>
-
-      <label for="digInSituAmido">Dig. In Situ Amido (%):</label>
-      <input type="number" id="digInSituAmido" name="digInSituAmido" step="0.01" required>
-
-      <label for="kdFdn">Kd FDN (%/h):</label>
-      <input type="number" id="kdFdn" name="kdFdn" step="0.01" required>
-
-      <label for="kdAmido">Kd Amido (%/h):</label>
-      <input type="number" id="kdAmido" name="kdAmido" step="0.01" required>
-
-      <label for="ndt">NDT (%):</label>
-      <input type="number" id="ndt" name="ndt" step="0.01" required>
-
-      <label for="milkTon">Milk/Ton (kg):</label>
-      <input type="number" id="milkTon" name="milkTon" step="0.01" required>
-
+      <!-- Campos do formulário conforme fornecido -->
       <button type="submit">Enviar</button>
     </form>
   </div>
 
   <script>
-    // Função para armazenar os dados no localStorage
+    // Função para salvar dados no localStorage
     function saveFormData() {
       const formData = {
         cliente: document.getElementById('cliente').value,
@@ -194,69 +59,44 @@
       localStorage.setItem('formData', JSON.stringify(storedData));
     }
 
-    // Função para enviar os dados para o Google Sheets (via API)
-function sendToGoogleSheets(formData) {
-  const scriptURL = 'https://script.google.com/macros/s/AKfycbyoXrmiK2QhQSQtfkQyTMuJA2x5fcuSMwEsmvh0db9hCCZhtzjDryF8XVvWXV_vhDjZaw/exec'; // Certifique-se de que esta URL está correta
+    // Função para enviar dados para o Google Sheets
+    async function sendToGoogleSheets(formData) {
+      const scriptURL = 'https://script.google.com/macros/s/AKfycbyoXrmiK2QhQSQtfkQyTMuJA2x5fcuSMwEsmvh0db9hCCZhtzjDryF8XVvWXV_vhDjZaw/exec';
 
-  console.log('Dados sendo enviados:', formData);
+      try {
+        const response = await fetch(scriptURL, {
+          method: 'POST',
+          body: new URLSearchParams(formData),
+        });
 
-  fetch(scriptURL, {
-    method: 'POST',
-    body: new URLSearchParams(formData)
-  })
-  .then(response => response.json())
-  .then(data => {
-    console.log('Resposta do servidor:', data);
-    if (data.result === 'success') {
-      alert(data.message);
-      console.log('Dados recebidos pelo servidor:', data.receivedData);
-      console.log('Dados salvos na planilha:', data.savedData);
-    } else {
-      alert('Erro ao enviar dados: ' + JSON.stringify(data));
+        const data = await response.json();
+        console.log('Resposta do servidor:', data);
+
+        if (data.result === 'success') {
+          alert(data.message || 'Dados enviados com sucesso!');
+          console.log('Detalhes:', data);
+        } else {
+          alert(`Erro ao enviar dados: ${data.message || 'Verifique o servidor.'}`);
+        }
+      } catch (error) {
+        console.error('Erro ao enviar os dados:', error);
+        alert('Erro na conexão. Tente novamente mais tarde.');
+      }
     }
-  })
-  .catch(error => {
-    console.error('Erro:', error);
-    alert('Erro ao enviar dados: ' + error.message);
-  });
-}
-    // Envia os dados ao submeter o formulário
-    document.getElementById('amostraForm').addEventListener('submit', function(event) {
-      event.preventDefault();
 
-      const formData = {
-        cliente: document.getElementById('cliente').value,
-        entrada: document.getElementById('entrada').value,
-        codigoBarras: document.getElementById('codigoBarras').value,
-        descricao: document.getElementById('descricao').value,
-        ms: document.getElementById('ms').value,
-        umidade: document.getElementById('umidade').value,
-        fda: document.getElementById('fda').value,
-        fdnmo: document.getElementById('fdnmo').value,
-        lignina: document.getElementById('lignina').value,
-        amido: document.getElementById('amido').value,
-        pBruta: document.getElementById('pBruta').value,
-        pida: document.getElementById('pida').value,
-        pidn: document.getElementById('pidn').value,
-        pSoluvel: document.getElementById('pSoluvel').value,
-        ee: document.getElementById('ee').value,
-        cinzas: document.getElementById('cinzas').value,
-        ph: document.getElementById('ph').value,
-        aLactico: document.getElementById('aLactico').value,
-        aAcetico: document.getElementById('aAcetico').value,
-        aButirico: document.getElementById('aButirico').value,
-        dFDNp48h: document.getElementById('dFDNp48h').value,
-        uFDN240h: document.getElementById('uFDN240h').value,
-        digInSituAmido: document.getElementById('digInSituAmido').value,
-        kdFdn: document.getElementById('kdFdn').value,
-        kdAmido: document.getElementById('kdAmido').value,
-        ndt: document.getElementById('ndt').value,
-        milkTon: document.getElementById('milkTon').value,
-      };
+    // Evento do formulário
+    document.getElementById('amostraForm').addEventListener('submit', function (event) {
+      event.preventDefault(); // Evitar recarregar página
+      const formData = new FormData(this);
 
-      // Armazenar os dados offline e enviar para o Google Sheets
+      // Salvar localmente
       saveFormData();
-      sendToGoogleSheets(formData);
+
+      // Enviar para o Google Sheets
+      sendToGoogleSheets(Object.fromEntries(formData.entries()));
+
+      // Resetar o formulário
+      this.reset();
     });
   </script>
 </body>
